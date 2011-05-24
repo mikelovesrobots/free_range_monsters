@@ -3,6 +3,9 @@ local MainMenuScreen = ScreenManager:addState('MainMenuScreen')
 MainMenuScreen.CHANGE_RATE = 1
 
 function MainMenuScreen:enterState() 
+  self._titleFont = love.graphics.newFont("fonts/VeraMono.ttf", 18)
+  self._menuFont = love.graphics.newFont("fonts/VeraMono.ttf", 15)
+
   log("MainMenuScreen initialized")
 
   self.current_color = {0,0,0}
@@ -20,9 +23,11 @@ function MainMenuScreen:enterState()
 end
 
 function MainMenuScreen:draw()
+  love.graphics.setFont(self._titleFont);
   love.graphics.setColor(self.current_color[1], self.current_color[2], self.current_color[3]);
   love.graphics.printf("Dead Hand and the Search For the Last Doomsday Device", 0, 200, 800, 'center')
   
+  love.graphics.setFont(self._menuFont);
   love.graphics.setColor(200,200,200)
   for i,v in ipairs(self.menu) do 
     local text = v.label
