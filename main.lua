@@ -5,6 +5,9 @@ require('main_menu_screen')
 require('morgue_screen')
 require('about_screen')
 require('play_screen')
+require('sector')
+require('terrain')
+require('table-extras')
 
 DEBUG = true
 

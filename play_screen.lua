@@ -20,8 +20,10 @@ function PlayScreen:enterState()
   local font = love.graphics.newFont("fonts/VeraMono.ttf", 13)
   love.graphics.setFont(font);
 
-  self.player = { forecolor={255,255,255}, character="@", x=10, y=20 }
-  self.entities = { self.player }
+  self.player = { forecolor={255,255,255}, character="@", x=10, y=10 }
+  self.sector = Sector:new(self, 0,0)
+  table.insert(self.sector.entities, self.player)
+  self.sector:move(self.player, 0, 0)
 end
 
 function PlayScreen:draw()
@@ -35,48 +37,31 @@ function PlayScreen:keypressed(key, unicode)
   if (key == "q") then
     screen_manager:popState()
   elseif (key == "h") then
-    self.player.x = self.player.x - 1
-    self:clip_to_map(self.player)
+    self.sector:move(self.player, -1, 0)
   elseif (key == "j") then
-    self.player.y = self.player.y + 1
-    self:clip_to_map(self.player)
+    self.sector:move(self.player, 0, 1)
   elseif (key == "k") then
-    self.player.y = self.player.y - 1
-    self:clip_to_map(self.player)
+    self.sector:move(self.player, 0, -1)
   elseif (key == "l") then
-    self.player.x = self.player.x + 1
-    self:clip_to_map(self.player)
+    self.sector:move(self.player, 1, 0)
   elseif (key == "y") then
-    self.player.x = self.player.x - 1
-    self.player.y = self.player.y - 1
-    self:clip_to_map(self.player)
+    self.sector:move(self.player, -1, -1)
   elseif (key == "u") then
-    self.player.x = self.player.x + 1
-    self.player.y = self.player.y - 1
-    self:clip_to_map(self.player)
+    self.sector:move(self.player, 1, -1)
   elseif (key == "b") then
-    self.player.x = self.player.x - 1
-    self.player.y = self.player.y + 1
-    self:clip_to_map(self.player)
+    self.sector:move(self.player, -1, 1)
   elseif (key == "n") then
-    self.player.x = self.player.x + 1
-    self.player.y = self.player.y + 1
-    self:clip_to_map(self.player)
+    self.sector:move(self.player, 1, 1)
   end
 end
 
 function PlayScreen:draw_map()
-  love.graphics.setColor(255,218,185)
-
-  for x=1,PlayScreen.MAP_NUM_CELLS_X do
-    for y=1,PlayScreen.MAP_NUM_CELLS_Y do
-      love.graphics.print(".", self:map_to_pix_x(x), self:map_to_pix_y(y))
+  for x,row in ipairs(self.sector.map) do
+    for y,terrain in ipairs(row) do
+      local forecolor = terrain:top_forecolor()
+      love.graphics.setColor(forecolor[1], forecolor[2], forecolor[3])
+      love.graphics.print(terrain:top_character(), self:map_to_pix_x(x), self:map_to_pix_y(y))
     end
-  end
-
-  for i,entity in ipairs(self.entities) do
-    love.graphics.setColor(entity.forecolor[1], entity.forecolor[2], entity.forecolor[3])
-    love.graphics.print(entity.character, self:map_to_pix_x(entity.x), self:map_to_pix_y(entity.y))
   end
 end
 
@@ -86,21 +71,6 @@ end
 
 function PlayScreen:map_to_pix_y(y)
   return (y - 1) * PlayScreen.CELL_HEIGHT + PlayScreen.MAP_MARGIN_TOP
-end
-
-function PlayScreen:clip(i, min, max)
-  if (i < min) then
-    return min
-  elseif (i > max) then
-    return max
-  else
-    return i
-  end
-end
-
-function PlayScreen:clip_to_map(entity)
-  entity.x = self:clip(entity.x, 1, PlayScreen.MAP_NUM_CELLS_X)
-  entity.y = self:clip(entity.y, 1, PlayScreen.MAP_NUM_CELLS_Y)
 end
 
 function PlayScreen:draw_stream()
