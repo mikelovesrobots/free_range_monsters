@@ -5,7 +5,12 @@ PlayScreen.CELL_HEIGHT = 15
 PlayScreen.MAP_MARGIN_TOP = 10
 PlayScreen.MAP_MARGIN_LEFT = 25
 PlayScreen.MAP_NUM_CELLS_X = 75
-PlayScreen.MAP_NUM_CELLS_Y = 21
+PlayScreen.MAP_NUM_CELLS_Y = 26
+PlayScreen.STATS_MARGIN_TOP = 420
+PlayScreen.STATS_MARGIN_LEFT = 400
+PlayScreen.STREAM_WIDTH = 350
+PlayScreen.STREAM_MARGIN_TOP = 420
+PlayScreen.STREAM_MARGIN_LEFT = 25
 
 PlayScreen.DIVIDER_X = 400
 
@@ -45,19 +50,19 @@ end
 function PlayScreen:draw_stream()
   love.graphics.setColor(255,255,255);
   
-  local sample_text = "Reached skill level 11 in Street Fighting\nEarned 20 XP\nLearned a level 5 spell: Blades of Dooooooooom\nReached skill level 10 in Transmutations\nReached skill level 12 in Unarmed Combat\nNoticed Erica\nReached skill level 11 in Unarmed Combat\nReached XP level 11. HP: 79/79 MP: 17/21\nLearned a level 5 spell: Blade Hands\nReached skill level 10 in Transmutations\nReached skill level 12 in Unarmed Combat\nNoticed Erica";
+  local sample_text = "Reached skill level 11 in Construction\n[Salvage] Earned 20 XP\n[Salvage] Earned 15 XP\nFound a handful of nails\nEngineered a board with nails in it\nNoticed a raider\n[Melee] Earned 10 XP\nReached XP level 11";
   
-  love.graphics.printf(sample_text, PlayScreen.MAP_MARGIN_LEFT, 350, 400, "left");
+  love.graphics.printf(sample_text, PlayScreen.STREAM_MARGIN_LEFT, PlayScreen.STREAM_MARGIN_TOP, PlayScreen.STREAM_WIDTH, "left");
 end
 
 function PlayScreen:draw_stats()
   love.graphics.setColor(255,255,255);
-  love.graphics.print("Health: [" .. "**********" .. "] 20/20", PlayScreen.DIVIDER_X + PlayScreen.MAP_MARGIN_LEFT, 350);
-  love.graphics.print("  Food: [" .. "*****" .. "     " .. "] 20/20", PlayScreen.DIVIDER_X + PlayScreen.MAP_MARGIN_LEFT, 370);
-  love.graphics.print("  Rads: [" .. "*" .. "         " .. "] 1/10", PlayScreen.DIVIDER_X + PlayScreen.MAP_MARGIN_LEFT, 390);
-  love.graphics.print("(a) 9mm Semiautomatic Pistol +2/+1", PlayScreen.DIVIDER_X + PlayScreen.MAP_MARGIN_LEFT, 430); 
-  love.graphics.print("        -- 7/9 rounds chambered", PlayScreen.DIVIDER_X + PlayScreen.MAP_MARGIN_LEFT, 450); 
-  love.graphics.print("(b) Board with a nail in it +1/+1", PlayScreen.DIVIDER_X + PlayScreen.MAP_MARGIN_LEFT, 470); 
+  love.graphics.print("Health: [" .. "**********" .. "] 20/20", PlayScreen.STATS_MARGIN_LEFT, PlayScreen.STATS_MARGIN_TOP);
+  love.graphics.print("  Food: [" .. "*****" .. "     " .. "] 20/20", PlayScreen.STATS_MARGIN_LEFT, PlayScreen.STATS_MARGIN_TOP + 20);
+  love.graphics.print("  Rads: [" .. "*" .. "         " .. "] 1/10", PlayScreen.STATS_MARGIN_LEFT, PlayScreen.STATS_MARGIN_TOP + 40);
+  love.graphics.print("(a) 9mm Semiautomatic Pistol +2/+1", PlayScreen.STATS_MARGIN_LEFT, PlayScreen.STATS_MARGIN_TOP + 80); 
+  love.graphics.print("        -- 7/9 rounds chambered", PlayScreen.STATS_MARGIN_LEFT, PlayScreen.STATS_MARGIN_TOP + 100); 
+  love.graphics.print("(b) Board with a nail in it +1/+1", PlayScreen.STATS_MARGIN_LEFT, PlayScreen.STATS_MARGIN_TOP + 120); 
 end
 
 function PlayScreen:draw_fps()
