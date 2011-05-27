@@ -14,7 +14,7 @@ function Sector:generate_map()
   for x = 1, self.play_screen.MAP_NUM_CELLS_X do
     local row = {}
     for y = 1, self.play_screen.MAP_NUM_CELLS_Y do
-      table.insert(row, Terrain:new(self))
+      table.insert(row, Terrain:new())
     end
     table.insert(maps, row)
   end

@@ -1,6 +1,5 @@
 Terrain = class('Terrain')
-function Terrain:initialize(map)
-  self.map = map
+function Terrain:initialize()
   self.character = '.'
   self.forecolor = {255,255,255}
   self.entity = nil
@@ -21,3 +20,4 @@ function Terrain:top_entity()
     return(self)
   end
 end
+

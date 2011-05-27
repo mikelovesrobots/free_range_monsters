@@ -1,5 +1,8 @@
 require('middleclass')
 require('middleclass-extras')
+require('table-extras')
+require('json/json')
+
 require('screen_manager')
 require('main_menu_screen')
 require('morgue_screen')
@@ -7,7 +10,6 @@ require('about_screen')
 require('play_screen')
 require('sector')
 require('terrain')
-require('table-extras')
 
 DEBUG = true
 
@@ -32,4 +34,9 @@ function log(string)
   if (DEBUG) then
     print(string)
   end
+end
+
+-- FIXME this is osx/linux specific  windows says this command will work instead: mkdir [dir].  no -p
+function mkdir(dir)
+  os.execute("mkdir -p " .. dir)
 end

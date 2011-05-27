@@ -11,7 +11,6 @@ PlayScreen.STATS_MARGIN_LEFT = 400
 PlayScreen.STREAM_WIDTH = 350
 PlayScreen.STREAM_MARGIN_TOP = 420
 PlayScreen.STREAM_MARGIN_LEFT = 25
-
 PlayScreen.DIVIDER_X = 400
 
 function PlayScreen:enterState() 
