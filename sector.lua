@@ -17,7 +17,7 @@ function Sector:generate_map()
       if x == 20 or x == 21 or x == 23 or x == 24 then
         table.insert(row, create_terrain("road"))
       elseif x == 22 then
-        if y % 2 == 1 and math.random(1,3) <= 2 then
+        if y % 2 == 1 and math.random(1,4) <= 3 then
           table.insert(row, create_terrain("lane marker"))
         else 
           table.insert(row, create_terrain("road"))
@@ -68,25 +68,25 @@ function create_terrain(name)
     return {
       name="road",
       character='|',
-      forecolor={203,207,180}
+      forecolor={246,235,187}
     }
   elseif name == "lane marker" then
     return {
       name="lane marker",
       character=':',
-      forecolor={196,209,119}
+      forecolor={248,202,0}
     }
   elseif name == "rubble" then
     return {
       name="rubble",
       character='.',
-      forecolor={53,49,48}
+      forecolor={221,78,35} -- {162,165,108}
     }
   elseif name == "rock" then
     return {
       name="rock",
       character='~',
-      forecolor={104,70,43}
+      forecolor={221,78,35}
     }
   else
     print("unknown terrain type: " .. name)

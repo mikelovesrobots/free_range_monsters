@@ -19,7 +19,7 @@ function PlayScreen:enterState()
   local font = love.graphics.newFont("fonts/VeraMono.ttf", 13)
   love.graphics.setFont(font);
 
-  self.player = { forecolor={247,52,91}, character="@", x=10, y=10 }
+  self.player = { forecolor={120,203,255}, character="@", x=10, y=10 }
   self.sector = Sector:new(self, 0,0)
   table.insert(self.sector.entities, self.player)
   self.sector:move(self.player, 0, 0)
@@ -55,6 +55,7 @@ function PlayScreen:keypressed(key, unicode)
 end
 
 function PlayScreen:draw_map()
+
   for x,row in ipairs(self.sector.map) do
     for y,terrain in ipairs(row) do
       local forecolor = terrain_top_forecolor(terrain)
