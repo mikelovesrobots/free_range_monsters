@@ -43,8 +43,8 @@ function Sector:move(entity, x_offset, y_offset)
     self.map[entity.x][entity.y].entity = nil
   end
   
-  local x = self:clip(entity.x + x_offset, 1, self.play_screen.MAP_NUM_CELLS_X)
-  local y = self:clip(entity.y + y_offset, 1, self.play_screen.MAP_NUM_CELLS_Y)
+  local x = clip(entity.x + x_offset, 1, self.play_screen.MAP_NUM_CELLS_X)
+  local y = clip(entity.y + y_offset, 1, self.play_screen.MAP_NUM_CELLS_Y)
 
   entity.x = x
   entity.y = y
@@ -52,7 +52,7 @@ function Sector:move(entity, x_offset, y_offset)
   self.map[x][y].entity = entity
 end
 
-function Sector:clip(i, min, max)
+function clip(i, min, max)
   if (i < min) then
     return min
   elseif (i > max) then
