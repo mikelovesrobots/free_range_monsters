@@ -3,12 +3,12 @@ require('middleclass-extras')
 require('table-extras')
 require('json/json')
 
+require('config')
 require('screen_manager')
 require('main_menu_screen')
 require('morgue_screen')
 require('about_screen')
 require('play_screen')
-require('sector')
 
 DEBUG = true
 
