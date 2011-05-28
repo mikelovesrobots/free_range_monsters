@@ -1,7 +1,7 @@
 require('middleclass')
 require('middleclass-extras')
 require('table-extras')
-require('json/json')
+json = require('json/dkjson')
 
 require('config')
 require('extras')

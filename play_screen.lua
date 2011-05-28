@@ -6,52 +6,95 @@ function PlayScreen:enterState()
   
   local font = love.graphics.newFont("fonts/VeraMono.ttf", 13)
   love.graphics.setFont(font);
-
-  self.player = { forecolor={120,203,255}, character="@", x=10, y=10 }
-
-  self.sector = {
-    entities=self.player,
-    x=0,
-    y=0,
-    map=generate_map()
-  }
-  map_entity_move(self.sector.map, self.player, 0, 0)
 end
 
 function PlayScreen:draw()
-  self:draw_map(self)
-  self:draw_stream(self)
-  self:draw_stats(self)
-  self:draw_fps(self)
+  if self.sector then
+    self:draw_map(self)
+    self:draw_stream(self)
+    self:draw_stats(self)
+    self:draw_fps(self)
+  end
 end
 
 function PlayScreen:keypressed(key, unicode)
   if (key == "q") then
+    self:save_sector()
     screen_manager:popState()
-    mkdir("saves")
-    -- print(json:encode(1))
   elseif (key == "h") then
-    map_entity_move(self.sector.map, self.player, -1, 0)
+    map_entity_move(self.sector.data.map, self.sector.player, -1, 0)
   elseif (key == "j") then
-    map_entity_move(self.sector.map, self.player, 0, 1)
+    map_entity_move(self.sector.data.map, self.sector.player, 0, 1)
   elseif (key == "k") then
-    map_entity_move(self.sector.map, self.player, 0, -1)
+    map_entity_move(self.sector.data.map, self.sector.player, 0, -1)
   elseif (key == "l") then
-    map_entity_move(self.sector.map, self.player, 1, 0)
+    map_entity_move(self.sector.data.map, self.sector.player, 1, 0)
   elseif (key == "y") then
-    map_entity_move(self.sector.map, self.player, -1, -1)
+    map_entity_move(self.sector.data.map, self.sector.player, -1, -1)
   elseif (key == "u") then
-    map_entity_move(self.sector.map, self.player, 1, -1)
+    map_entity_move(self.sector.data.map, self.sector.player, 1, -1)
   elseif (key == "b") then
-    map_entity_move(self.sector.map, self.player, -1, 1)
+    map_entity_move(self.sector.data.map, self.sector.player, -1, 1)
   elseif (key == "n") then
-    map_entity_move(self.sector.map, self.player, 1, 1)
+    map_entity_move(self.sector.data.map, self.sector.player, 1, 1)
+  end
+end
+
+function PlayScreen:madness()
+  log("fuck")
+end
+
+function PlayScreen:save_sector()
+  mkdir("saves")
+
+  local out = assert(io.open(sector_filename(self.sector.data.x, self.sector.data.y), "w"))
+  out:write(json.encode(self.sector.data))
+  io.close(out)
+end
+
+function PlayScreen:load_sector()
+  local infile = assert(io.open(sector_filename(0,0), "r"), "Failed to open input file")
+  local injson = infile:read("*a")
+  
+  self.sector = {}
+  self.sector.data = json.decode(injson)
+  sector_index(self.sector)
+end
+
+function PlayScreen:generate_sector()
+  self.sector = {
+    player={name="player", forecolor={120,203,255}, character="@", x=10, y=10},
+    entities=self.player,
+    data={
+      x=0,
+      y=0,
+      map=generate_map()
+    }
+  }
+  map_entity_move(self.sector.data.map, self.sector.player, 0, 0)
+end
+
+function sector_filename(x, y)
+  return "saves/sector-" .. x .. "-" .. y .. ".json"
+end
+
+function sector_index(sector)
+  sector.entities = {}
+  for x,row in ipairs(sector.data.map) do
+    for y,terrain in ipairs(row) do
+      if terrain.entity then
+        table.insert(sector.entities, terrain.entity)
+
+        if terrain.entity.name == "player" then
+          sector.player = terrain.entity
+        end
+      end
+    end
   end
 end
 
 function PlayScreen:draw_map()
-
-  for x,row in ipairs(self.sector.map) do
+  for x,row in ipairs(self.sector.data.map) do
     for y,terrain in ipairs(row) do
       local forecolor = terrain_top_forecolor(terrain)
       love.graphics.setColor(forecolor[1], forecolor[2], forecolor[3])

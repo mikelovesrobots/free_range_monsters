@@ -3,6 +3,13 @@ function mkdir(dir)
   os.execute("mkdir -p " .. dir)
 end
 
+function file_exists(n)
+  local f=io.open(n)
+  if f then
+    io.close(f)
+  end
+  return f ~= nil
+end
 
 function log(string)
   if (DEBUG) then

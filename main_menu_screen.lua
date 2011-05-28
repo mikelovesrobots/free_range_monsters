@@ -12,14 +12,11 @@ function MainMenuScreen:enterState()
   self.time_since_last_change = 0
   self.regenerate_target_color(self)
 
-  self.menu = {
-    {label="Continue Previous Game", f=self.continue_previous_game_selected},
-    {label="Start New Game", f=self.start_new_game_selected},
-    {label="Dead Characters", f=self.morgue_selected}, 
-    {label="About", f=self.about_selected}, 
-    {label="Quit", f=self.quit_selected}
-  }
-  self.menu_index = 1
+  self:reset_menu()
+end
+
+function MainMenuScreen:continuedState()
+  self:reset_menu()
 end
 
 function MainMenuScreen:draw()
@@ -73,16 +70,36 @@ function MainMenuScreen:update(dt)
   self.current_color[3] = self.current_color[3] + ((self.target_color[3] - self.current_color[3]) * multiplier)
 end
 
+function MainMenuScreen:reset_menu()
+  log("resetting the menu")
+
+  self.menu = {
+    {label="Start New Game", f=self.start_new_game_selected},
+    {label="Dead Characters", f=self.morgue_selected}, 
+    {label="About", f=self.about_selected}, 
+    {label="Quit", f=self.quit_selected}
+  }
+
+  if file_exists(sector_filename(0,0)) then
+    table.insert(self.menu, 1, {label="Continue Previous Game", f=self.continue_previous_game_selected})
+  end
+
+  self.menu_index = 1
+end
+
+
 function MainMenuScreen:regenerate_target_color()
   self.target_color = {math.random(200,255), math.random(200,255), math.random(100,255)}
 end
 
 function MainMenuScreen:continue_previous_game_selected()
   screen_manager:pushState('PlayScreen')
+  screen_manager:load_sector()
 end
 
 function MainMenuScreen:start_new_game_selected()
   screen_manager:pushState('PlayScreen')
+  screen_manager:generate_sector()
 end
 
 function MainMenuScreen:morgue_selected()
