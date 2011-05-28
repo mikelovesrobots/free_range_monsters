@@ -136,19 +136,22 @@ end
 
 
 function map_entity_move(map, entity, x_offset, y_offset)
-  if (map[entity.x][entity.y].entity == entity) then
-    map[entity.x][entity.y].entity = nil
-  end
-  
   local x = clip(entity.x + x_offset, 1, app.config.MAP_NUM_CELLS_X)
   local y = clip(entity.y + y_offset, 1, app.config.MAP_NUM_CELLS_Y)
 
-  entity.x = x
-  entity.y = y
+  if (map[x][y].passable) then
+    if (map[entity.x][entity.y].entity == entity) then
+      map[entity.x][entity.y].entity = nil
+    end
+    
+    entity.x = x
+    entity.y = y
 
-  map[x][y].entity = entity
+    map[x][y].entity = entity
+  end
 end
 
+-- returns a random map
 function generate_map()
   local maps = {}
 
@@ -167,9 +170,11 @@ function generate_map()
         table.insert(row, create_terrain("road"))
       else
         if math.random(1,10) == 1 then
+          table.insert(row, create_terrain("rubble"))
+        elseif math.random(1,30) == 1 then
           table.insert(row, create_terrain("rock"))
         else
-          table.insert(row, create_terrain("rubble"))
+          table.insert(row, create_terrain("dirt"))
         end
       end
     end
@@ -195,25 +200,36 @@ function create_terrain(name)
     return {
       name="road",
       character='|',
-      forecolor={246,235,187}
+      forecolor={246,235,187},
+      passable=true
     }
   elseif name == "lane marker" then
     return {
       name="lane marker",
       character=':',
-      forecolor={248,202,0}
+      forecolor={248,202,0},
+      passable=true
+    }
+  elseif name == "dirt" then
+    return {
+      name="dirt",
+      character='.',
+      forecolor={221,78,35},
+      passable=true
     }
   elseif name == "rubble" then
     return {
       name="rubble",
-      character='.',
-      forecolor={221,78,35} -- {162,165,108}
+      character='~',
+      forecolor={221,78,35},
+      passable=true
     }
   elseif name == "rock" then
     return {
       name="rock",
-      character='~',
-      forecolor={221,78,35}
+      character='^',
+      forecolor={221,78,35},
+      passable=false
     }
   else
     print("unknown terrain type: " .. name)
