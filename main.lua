@@ -4,6 +4,7 @@ require('table-extras')
 require('json/json')
 
 require('config')
+require('extras')
 require('screen_manager')
 require('main_menu_screen')
 require('morgue_screen')
@@ -27,15 +28,4 @@ end
 
 function love.keypressed(key, unicode)
   screen_manager:keypressed(key, unicode)
-end
-
-function log(string)
-  if (DEBUG) then
-    print(string)
-  end
-end
-
--- FIXME this is osx/linux specific  windows says this command will work instead: mkdir [dir].  no -p
-function mkdir(dir)
-  os.execute("mkdir -p " .. dir)
 end

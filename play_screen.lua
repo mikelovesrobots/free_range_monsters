@@ -28,6 +28,8 @@ end
 function PlayScreen:keypressed(key, unicode)
   if (key == "q") then
     screen_manager:popState()
+    mkdir("saves")
+    -- print(json:encode(1))
   elseif (key == "h") then
     map_entity_move(self.sector.map, self.player, -1, 0)
   elseif (key == "j") then
