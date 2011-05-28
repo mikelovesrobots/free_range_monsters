@@ -9,7 +9,6 @@ require('morgue_screen')
 require('about_screen')
 require('play_screen')
 require('sector')
-require('terrain')
 
 DEBUG = true
 
