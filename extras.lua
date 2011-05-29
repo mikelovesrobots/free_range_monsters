@@ -16,3 +16,8 @@ function log(string)
     print(string)
   end
 end
+
+table.merge = function(source, destination)
+  for k,v in pairs(source) do destination[k] = v end
+  return destination
+end

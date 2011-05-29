@@ -62,16 +62,24 @@ function PlayScreen:load_sector()
 end
 
 function PlayScreen:generate_sector()
+  local monster1 = create_entity("raider", 50, 20)
+  local monster2 = create_entity("raider", 55, 18)
+  local monster3 = create_entity("raider", 60, 23)
+  local player = create_entity("player", 10, 10)
+
   self.sector = {
-    player={name="player", forecolor={120,203,255}, character="@", x=10, y=10},
-    entities=self.player,
+    player=player,
+    entities={player, monster1, monster2, monster3},
     data={
       x=0,
       y=0,
       map=generate_map()
     }
   }
-  map_entity_move(self.sector.data.map, self.sector.player, 0, 0)
+  map_entity_move(self.sector.data.map, player, 0, 0)
+  map_entity_move(self.sector.data.map, monster1, 0, 0)
+  map_entity_move(self.sector.data.map, monster2, 0, 0)
+  map_entity_move(self.sector.data.map, monster3, 0, 0)
 end
 
 function sector_filename(x, y)
@@ -139,7 +147,7 @@ function map_entity_move(map, entity, x_offset, y_offset)
   local x = clip(entity.x + x_offset, 1, app.config.MAP_NUM_CELLS_X)
   local y = clip(entity.y + y_offset, 1, app.config.MAP_NUM_CELLS_Y)
 
-  if (map[x][y].passable) then
+  if (map[x][y].passable and not map[x][y].entity) then
     if (map[entity.x][entity.y].entity == entity) then
       map[entity.x][entity.y].entity = nil
     end
@@ -228,11 +236,31 @@ function create_terrain(name)
     return {
       name="rock",
       character='^',
-      forecolor={221,78,35},
+      forecolor={162,165,108},
       passable=false
     }
   else
     print("unknown terrain type: " .. name)
+  end
+end
+
+function create_entity(type, x, y)
+  local base = {
+    x=x,
+    y=y
+  }
+  if type == "raider" then
+    return table.merge(base, {
+      name="raider",
+      character="@",
+      forecolor={246,235,187}
+    })
+  elseif type == "player" then
+    return table.merge(base, {
+      name="player",
+      character="@",
+      forecolor={120,203,255}
+    })
   end
 end
 
