@@ -6,6 +6,8 @@ function PlayScreen:enterState()
   
   local font = love.graphics.newFont("fonts/VeraMono.ttf", 13)
   love.graphics.setFont(font);
+
+  self.status_messages = {}
 end
 
 function PlayScreen:draw()
@@ -21,27 +23,95 @@ function PlayScreen:keypressed(key, unicode)
   if (key == "q") then
     self:save_sector()
     screen_manager:popState()
-  elseif (key == "h") then
-    map_entity_move(self.sector.data.map, self.sector.player, -1, 0)
-  elseif (key == "j") then
-    map_entity_move(self.sector.data.map, self.sector.player, 0, 1)
-  elseif (key == "k") then
-    map_entity_move(self.sector.data.map, self.sector.player, 0, -1)
-  elseif (key == "l") then
-    map_entity_move(self.sector.data.map, self.sector.player, 1, 0)
-  elseif (key == "y") then
-    map_entity_move(self.sector.data.map, self.sector.player, -1, -1)
-  elseif (key == "u") then
-    map_entity_move(self.sector.data.map, self.sector.player, 1, -1)
-  elseif (key == "b") then
-    map_entity_move(self.sector.data.map, self.sector.player, -1, 1)
-  elseif (key == "n") then
-    map_entity_move(self.sector.data.map, self.sector.player, 1, 1)
+  elseif (self.sector.data.player_turn) then
+    local ends_turn = function ()
+      self:schedule_event(self.sector.player, "AI", 100)
+      self.sector.data.player_turn = false
+    end
+    if (key == "h") then
+      map_entity_move(self.sector.data.map, self.sector.player, -1, 0)
+      ends_turn()
+    elseif (key == "j") then
+      map_entity_move(self.sector.data.map, self.sector.player, 0, 1)
+      ends_turn()
+    elseif (key == "k") then
+      map_entity_move(self.sector.data.map, self.sector.player, 0, -1)
+      ends_turn()
+    elseif (key == "l") then
+      map_entity_move(self.sector.data.map, self.sector.player, 1, 0)
+      ends_turn()
+    elseif (key == "y") then
+      map_entity_move(self.sector.data.map, self.sector.player, -1, -1)
+      ends_turn()
+    elseif (key == "u") then
+      map_entity_move(self.sector.data.map, self.sector.player, 1, -1)
+      ends_turn()
+    elseif (key == "b") then
+      map_entity_move(self.sector.data.map, self.sector.player, -1, 1)
+      ends_turn()
+    elseif (key == "n") then
+      map_entity_move(self.sector.data.map, self.sector.player, 1, 1)
+      ends_turn()
+    else
+      log("unmapped key")
+    end
   end
 end
 
-function PlayScreen:madness()
-  log("fuck")
+function PlayScreen:start_new_game()
+  self:log("You wake to a nightmare.")
+  self:log("Friends, family slaughtered.")
+  self:log("The raiders have left you for dead and traveled North")
+end
+
+function PlayScreen:log(msg)
+  table.insert(self.status_messages, msg)
+end
+
+function PlayScreen:schedule_event(entity, task, ticks)
+  local scheduled_time = self.sector.data.current_time + ticks
+  local new_job = {entity=entity, task=task, scheduled_time=scheduled_time}
+  for i,job in ipairs(self.sector.data.event_queue) do
+    if job.scheduled_time > scheduled_time then
+      table.insert(self.sector.data.event_queue, i, new_job)
+      return
+    end
+  end
+
+  table.insert(self.sector.data.event_queue, new_job)
+end
+
+function PlayScreen:process_events()
+  while #self.sector.data.event_queue > 0 and not self.sector.data.player_turn do
+    self:process_next_event()
+  end
+end
+
+function PlayScreen:process_next_event()
+  local job = table.remove(self.sector.data.event_queue, 1)
+  if job then
+    if job.task == "AI" then
+      self:ai(job.entity)
+     else
+       print("Unknown task: '" .. job.task .. "'")
+    end
+    self.sector.data.current_time = job.scheduled_time
+  end
+end
+
+function PlayScreen:ai(entity)
+  if (entity.name == "player") then
+    self.sector.data.player_turn = true
+  else
+    map_entity_move(self.sector.data.map, entity, math.random(-1, 1), math.random(-1, 1))
+    self:schedule_event(entity, "AI", 100)
+  end
+end
+
+function PlayScreen:update(dt)
+  if (self.sector.data.event_queue and not self.sector.data.player_turn) then
+    self:process_events() 
+  end
 end
 
 function PlayScreen:save_sector()
@@ -61,7 +131,9 @@ function PlayScreen:load_sector()
   sector_index(self.sector)
 end
 
+
 function PlayScreen:generate_sector()
+  -- add monsters, the player and the map
   local monster1 = create_entity("raider", 50, 20)
   local monster2 = create_entity("raider", 55, 18)
   local monster3 = create_entity("raider", 60, 23)
@@ -71,15 +143,20 @@ function PlayScreen:generate_sector()
     player=player,
     entities={player, monster1, monster2, monster3},
     data={
+      current_time=0,
+      event_queue={},
+      player_turn=false,
       x=0,
       y=0,
       map=generate_map()
     }
   }
-  map_entity_move(self.sector.data.map, player, 0, 0)
-  map_entity_move(self.sector.data.map, monster1, 0, 0)
-  map_entity_move(self.sector.data.map, monster2, 0, 0)
-  map_entity_move(self.sector.data.map, monster3, 0, 0)
+
+  for i, v in ipairs(self.sector.entities) do
+    map_entity_move(self.sector.data.map, v, 0, 0)
+    self:schedule_event(v, "AI", 100)
+  end
+  
 end
 
 function sector_filename(x, y)
@@ -88,11 +165,12 @@ end
 
 function sector_index(sector)
   sector.entities = {}
+
   for x,row in ipairs(sector.data.map) do
     for y,terrain in ipairs(row) do
       if terrain.entity then
         table.insert(sector.entities, terrain.entity)
-
+        
         if terrain.entity.name == "player" then
           sector.player = terrain.entity
         end
@@ -135,6 +213,7 @@ function PlayScreen:draw_stats()
   love.graphics.print("(a) 9mm Semiautomatic Pistol +2/+1", app.config.STATS_MARGIN_LEFT, app.config.STATS_MARGIN_TOP + 80)
   love.graphics.print("        -- 7/9 rounds chambered", app.config.STATS_MARGIN_LEFT, app.config.STATS_MARGIN_TOP + 100)
   love.graphics.print("(b) Board with a nail in it +1/+1", app.config.STATS_MARGIN_LEFT, app.config.STATS_MARGIN_TOP + 120)
+  love.graphics.print("Current Time: " .. self.sector.data.current_time, app.config.STATS_MARGIN_LEFT, app.config.STATS_MARGIN_TOP + 140)
 end
 
 function PlayScreen:draw_fps()
@@ -148,9 +227,7 @@ function map_entity_move(map, entity, x_offset, y_offset)
   local y = clip(entity.y + y_offset, 1, app.config.MAP_NUM_CELLS_Y)
 
   if (map[x][y].passable and not map[x][y].entity) then
-    if (map[entity.x][entity.y].entity == entity) then
-      map[entity.x][entity.y].entity = nil
-    end
+    map[entity.x][entity.y].entity = nil
     
     entity.x = x
     entity.y = y
