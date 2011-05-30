@@ -2,7 +2,7 @@
 local MorgueScreen = ScreenManager:addState('MorgueScreen')
 
 function MorgueScreen:enterState() 
-  log("MorgueScreen initialized")
+  debug("MorgueScreen initialized")
 end
 
 function MorgueScreen:draw()

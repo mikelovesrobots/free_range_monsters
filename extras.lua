@@ -11,13 +11,12 @@ function file_exists(n)
   return f ~= nil
 end
 
-function log(string)
+function debug(string)
   if (DEBUG) then
     print(string)
   end
 end
 
-table.merge = function(source, destination)
-  for k,v in pairs(source) do destination[k] = v end
-  return destination
+function between(val, min, max)
+  return val >= min and val <= max
 end

@@ -2,7 +2,7 @@ ScreenManager = class('ScreenManager')
 ScreenManager:include(Stateful)
 
 function ScreenManager:initialize()
-  log("screenmanager initialized")
+  debug("screenmanager initialized")
   self:pushState('MainMenuScreen')
 end
 

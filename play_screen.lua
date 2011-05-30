@@ -2,7 +2,7 @@
 local PlayScreen = ScreenManager:addState('PlayScreen')
 
 function PlayScreen:enterState() 
-  log("PlayScreen initialized")
+  debug("PlayScreen initialized")
   
   local font = love.graphics.newFont("fonts/VeraMono.ttf", 13)
   love.graphics.setFont(font);
@@ -13,7 +13,7 @@ end
 function PlayScreen:draw()
   if self.sector then
     self:draw_map(self)
-    self:draw_stream(self)
+    self:draw_status_messages(self)
     self:draw_stats(self)
     self:draw_fps(self)
   end
@@ -53,15 +53,16 @@ function PlayScreen:keypressed(key, unicode)
       map_entity_move(self.sector.data.map, self.sector.player, 1, 1)
       ends_turn()
     else
-      log("unmapped key")
+      debug("unmapped key:" .. key)
     end
   end
 end
 
 function PlayScreen:start_new_game()
+  self:generate_sector()
   self:log("You wake to a nightmare.")
   self:log("Friends, family slaughtered.")
-  self:log("The raiders have left you for dead and traveled North")
+  self:log("All is in flames.")
 end
 
 function PlayScreen:log(msg)
@@ -88,12 +89,12 @@ function PlayScreen:process_events()
 end
 
 function PlayScreen:process_next_event()
-  local job = table.remove(self.sector.data.event_queue, 1)
+  local job = table.shift(self.sector.data.event_queue)
   if job then
     if job.task == "AI" then
       self:ai(job.entity)
-     else
-       print("Unknown task: '" .. job.task .. "'")
+    else
+      print("Unknowreturn n task: '" .. job.task .. "'")
     end
     self.sector.data.current_time = job.scheduled_time
   end
@@ -102,10 +103,96 @@ end
 function PlayScreen:ai(entity)
   if (entity.name == "player") then
     self.sector.data.player_turn = true
-  else
+  elseif (entity.name == "raider") then
+    if (self:get_entity_target(entity)) then
+      local target = self:get_entity_target(entity)
+      local astar_path = self:astar(entity, target.x, target.y)
+      if (astar_path and not table.empty(astar_path)) then
+        local next_move = astar_path[0]
+        local relative_x = entity.x - next_move[0]
+        local relative_y = entity.y - next_move[1]
+        map_entity_move(self.sector.data.map, entity, relative_x, relative_y)
+      else
+        debug("couldn't find a path")
+      end
+    else
+      debug("couldn't find a target")
+    end
+    self:schedule_event(entity, "AI", 100)
+  elseif (entity.name == "random-walk") then
     map_entity_move(self.sector.data.map, entity, math.random(-1, 1), math.random(-1, 1))
     self:schedule_event(entity, "AI", 100)
+  else
+    debug("unknown ai for entity: " .. entity.name)
   end
+end
+
+function PlayScreen:get_entity_target(entity)
+  return self.sector.player
+end
+
+function PlayScreen:astar(entity, x, y)
+  local visited_stack={}
+  local candidate_stack={{x,y,nil}} -- x, y, parent
+  local x = entity.x
+  local y = entity.y
+  
+  while (not table.empty(candidate_stack)) do
+    local candidate = table.shift(candidate_stack)
+
+    print(#candidate_stack)
+    -- is this it?
+    if candidate[1] == x and candidate[1] == y then 
+      return reconstruct_astar_path(candidate)
+    end
+
+    -- find other candidates
+    local candidates = table.select(neighboring_squares(x,y), function (cell)
+      if xy_inside_map(self.sector.data.map, cell[1], cell[2]) then
+        -- is passable and we haven't already visited it
+        local terrain = self.sector.data.map[cell[1]][cell[2]]
+        return terrain_is_passable(terrain) and not table.detect(visited_stack, function(other_cell) 
+          return other_cell[1] == cell[1] and other_cell[2] == cell[2]
+        end)
+      else
+        return false
+      end
+    end)
+
+    -- add the candidates for later processing
+    table.insert(visited_stack, candidate)
+    for i,v in ipairs(candidates) do
+      table.insert(candidate_stack, {v[1],v[2],candidate})
+    end
+  end
+
+  -- unreachable from here
+  return nil
+end
+
+function xy_inside_map(map, x, y)
+  return between(x, 1, #map) and between(y, 1, #map[x])
+end
+
+function reconstruct_astar_path(cells)
+  return table.reverse(table.collect(cells, function (cell)
+    return cell[3] 
+  end))
+end
+
+function terrain_is_passable(terrain) 
+  return terrain.passable and not terrain.entity
+end
+
+function neighboring_squares(x,y)
+  local relative_neighbors = {
+    {-1,-1}, {0, -1}, {1, -1},
+    {-1, 0},          {1, 0},
+    {-1, 1}, {0,  1} ,{1, 1}}
+
+  return table.collect(relative_neighbors, function (pair)
+    return {x + pair[1], y + pair[2]}
+  end)
 end
 
 function PlayScreen:update(dt)
@@ -197,12 +284,17 @@ function PlayScreen:map_to_pix_y(y)
   return (y - 1) * app.config.CELL_HEIGHT + app.config.MAP_MARGIN_TOP
 end
 
-function PlayScreen:draw_stream()
+function PlayScreen:draw_status_messages()
   love.graphics.setColor(255,255,255);
   
-  local sample_text = "Reached skill level 11 in Construction\n[Salvage] Earned 20 XP\n[Salvage] Earned 15 XP\nFound a handful of nails\nEngineered a board with nails in it\nNoticed a raider\n[Melee] Earned 10 XP\nReached XP level 11";
-  
-  love.graphics.printf(sample_text, app.config.STREAM_MARGIN_LEFT, app.config.STREAM_MARGIN_TOP, app.config.STREAM_WIDTH, "left");
+  local text = ''
+
+  local start_index = clip(#self.status_messages - 10, 1, #self.status_messages)
+  for index = start_index, #self.status_messages do
+    text = text .. self.status_messages[index] .. "\n"
+  end
+
+  love.graphics.printf(text, app.config.STREAM_MARGIN_LEFT, app.config.STREAM_MARGIN_TOP, app.config.STREAM_WIDTH, "left");
 end
 
 function PlayScreen:draw_stats()
@@ -226,7 +318,7 @@ function map_entity_move(map, entity, x_offset, y_offset)
   local x = clip(entity.x + x_offset, 1, app.config.MAP_NUM_CELLS_X)
   local y = clip(entity.y + y_offset, 1, app.config.MAP_NUM_CELLS_Y)
 
-  if (map[x][y].passable and not map[x][y].entity) then
+  if (terrain_is_passable(map[x][y])and not map[x][y].entity) then
     map[entity.x][entity.y].entity = nil
     
     entity.x = x

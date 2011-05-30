@@ -6,7 +6,7 @@ function MainMenuScreen:enterState()
   self._titleFont = love.graphics.newFont("fonts/VeraMono.ttf", 18)
   self._menuFont = love.graphics.newFont("fonts/VeraMono.ttf", 15)
 
-  log("MainMenuScreen initialized")
+  debug("MainMenuScreen initialized")
 
   self.current_color = {0,0,0}
   self.time_since_last_change = 0
@@ -71,7 +71,7 @@ function MainMenuScreen:update(dt)
 end
 
 function MainMenuScreen:reset_menu()
-  log("resetting the menu")
+  debug("resetting the menu")
 
   self.menu = {
     {label="Start New Game", f=self.start_new_game_selected},
@@ -99,7 +99,7 @@ end
 
 function MainMenuScreen:start_new_game_selected()
   screen_manager:pushState('PlayScreen')
-  screen_manager:generate_sector()
+  screen_manager:start_new_game()
 end
 
 function MainMenuScreen:morgue_selected()
