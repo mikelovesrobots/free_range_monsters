@@ -144,12 +144,16 @@ function PlayScreen:astar(sx, sy, dx, dy)
   end
 
   local candidate_stack={{x=sx, y=sy, parent=nil}}
+  local cells_examined = 0
   visited_map[sx][sy]=true 
 
   while (not table.empty(candidate_stack)) do
-    local candidate = table.shift(candidate_stack)
+    local candidate = table.pop(candidate_stack)
+
+    cells_examined = cells_examined + 1
 
     if candidate.x == dx and candidate.y == dy then 
+      debug(cells_examined .. " cells examined")
       return reconstruct_astar_path(candidate)
     end
 
@@ -166,7 +170,7 @@ function PlayScreen:astar(sx, sy, dx, dy)
 
     -- put them in the stack in priority of closest to the destination
     table.sort(neighbors, function (a, b) 
-      return math.dist(a.x, a.y, dx, dy) < math.dist(b.x, b.y, dx, dy) 
+      return math.dist(a.x, a.y, dx, dy) > math.dist(b.x, b.y, dx, dy) 
     end)
 
     -- add the candidates for later processing
