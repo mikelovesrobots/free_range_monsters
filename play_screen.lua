@@ -28,7 +28,9 @@ function PlayScreen:keypressed(key, unicode)
       self:schedule_event(self.sector.player, "AI", 100)
       self.sector.data.player_turn = false
     end
-    if (key == "h") then
+    if (key == "s") then
+      ends_turn()
+    elseif (key == "h") then
       map_entity_move(self.sector.data.map, self.sector.player, -1, 0)
       ends_turn()
     elseif (key == "j") then
@@ -142,16 +144,16 @@ function PlayScreen:astar(sx, sy, dx, dy)
     end
   end
 
-  local candidate_stack={{x=sx, y=sy, parent=nil}}
+  local candidate_stack={{x=sx, y=sy, parent=nil, movement_cost=0}}
   local cells_examined = 0
   visited_map[sx][sy]=true 
 
   while (not table.empty(candidate_stack)) do
     local candidate = table.pop(candidate_stack)
-
     cells_examined = cells_examined + 1
 
     if candidate.x == dx and candidate.y == dy then 
+      debug("astar found. cells_examined: " .. cells_examined)
       return reconstruct_astar_path(candidate)
     end
 
@@ -174,7 +176,23 @@ function PlayScreen:astar(sx, sy, dx, dy)
     -- add the candidates for later processing
     for i,cell in ipairs(neighbors) do
       visited_map[cell.x][cell.y] = true
-      table.insert(candidate_stack, {x=cell.x, y=cell.y, parent=candidate})
+  
+      local new_candidate = {x=cell.x, y=cell.y, parent=candidate, movement_cost = candidate.movement_cost + 1}
+      local inserted = false
+
+      if #candidate_stack > 0 then
+        for j, other in ipairs(candidate_stack) do
+          if other.movement_cost < new_candidate.movement_cost then
+            table.insert(candidate_stack, j, new_candidate)
+            inserted = true
+            break
+          end
+        end
+      end
+
+      if (not inserted) then
+        table.insert(candidate_stack, new_candidate)
+      end
     end
   end
 
@@ -247,15 +265,11 @@ end
 function PlayScreen:generate_sector()
   -- add monsters, the player and the map
   local monster1 = create_entity("raider", 50, 20)
-  local monster2 = create_entity("raider", 55, 18)
-  local monster3 = create_entity("raider", 60, 23)
-  local monster4 = create_entity("raider", 52, 12)
-  local monster5 = create_entity("raider", 54, 14)
   local player = create_entity("player", 10, 10)
 
   self.sector = {
     player=player,
-    entities={player, monster1, monster2, monster3, monster4, monster5},
+    entities={player, monster1},
     data={
       current_time=0,
       event_queue={},
@@ -326,13 +340,41 @@ end
 
 function PlayScreen:draw_stats()
   love.graphics.setColor(255,255,255)
-  love.graphics.print("Health: [" .. "**********" .. "] 20/20", app.config.STATS_MARGIN_LEFT, app.config.STATS_MARGIN_TOP)
-  love.graphics.print("  Food: [" .. "*****" .. "     " .. "] 20/20", app.config.STATS_MARGIN_LEFT, app.config.STATS_MARGIN_TOP + 20)
-  love.graphics.print("  Rads: [" .. "*" .. "         " .. "] 1/10", app.config.STATS_MARGIN_LEFT, app.config.STATS_MARGIN_TOP + 40)
-  love.graphics.print("(a) 9mm Semiautomatic Pistol +2/+1", app.config.STATS_MARGIN_LEFT, app.config.STATS_MARGIN_TOP + 80)
-  love.graphics.print("        -- 7/9 rounds chambered", app.config.STATS_MARGIN_LEFT, app.config.STATS_MARGIN_TOP + 100)
-  love.graphics.print("(b) Board with a nail in it +1/+1", app.config.STATS_MARGIN_LEFT, app.config.STATS_MARGIN_TOP + 120)
-  love.graphics.print("Current Time: " .. self.sector.data.current_time, app.config.STATS_MARGIN_LEFT, app.config.STATS_MARGIN_TOP + 140)
+
+  local stats = {
+    text_indicator("Health", self.sector.player.current_hp, self.sector.player.max_hp),
+    text_indicator("  Food", 10, 20),
+    text_indicator("  Rads", 0, 20),
+    "(a) 9mm Semiautomatic Pistol +2/+1",
+    "        -- 7/9 rounds chambered",
+    "(b) Board with a nail in it +1/+1",
+    "Current Time: " .. self.sector.data.current_time
+  }
+
+  for i,text in ipairs(stats) do
+    love.graphics.print(text, app.config.STATS_MARGIN_LEFT, app.config.STATS_MARGIN_TOP + (20 * (i - 1)))
+  end
+end
+
+function text_indicator(label, current, max)
+  local calc_stars = function () 
+    local result = ''
+
+    local num_stars = math.floor(current / max * 10)
+    local num_spaces = 10 - num_stars
+
+    for i = 1, num_stars do
+      result = result .. "*"
+    end
+
+    for i = 1, num_spaces do
+      result = result .. " "
+    end
+
+    return result
+  end
+
+  return label ..": [" .. calc_stars() .. "] " .. current .. "/" .. max
 end
 
 function PlayScreen:draw_fps()
@@ -373,12 +415,20 @@ function generate_map()
       elseif (x == 19 or x == 25) and math.random(1,4) <= 3 then
         table.insert(row, create_terrain("road"))
       else
-        if math.random(1,10) == 1 then
-          table.insert(row, create_terrain("rubble"))
-        elseif math.random(1,30) == 1 then
-          table.insert(row, create_terrain("rock"))
+        if (x == 13) then
+          if math.random(1,10) == 1 then
+            table.insert(row, create_terrain("rubble"))
+          else
+            table.insert(row, create_terrain("rock"))
+          end
         else
-          table.insert(row, create_terrain("dirt"))
+          if math.random(1,10) == 1 then
+            table.insert(row, create_terrain("rubble"))
+          elseif math.random(1,30) == 1 then
+            table.insert(row, create_terrain("rock"))
+          else
+            table.insert(row, create_terrain("dirt"))
+          end
         end
       end
     end
@@ -449,13 +499,17 @@ function create_entity(type, x, y)
     return table.merge(base, {
       name="raider",
       character="@",
-      forecolor={246,235,187}
+      forecolor={246,235,187},
+      max_hp=10,
+      current_hp=10
     })
   elseif type == "player" then
     return table.merge(base, {
       name="player",
       character="@",
-      forecolor={120,203,255}
+      forecolor={120,203,255},
+      max_hp=20,
+      current_hp=18
     })
   end
 end
