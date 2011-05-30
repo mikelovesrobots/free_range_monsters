@@ -106,11 +106,14 @@ function PlayScreen:ai(entity)
   elseif (entity.name == "raider") then
     if (self:get_entity_target(entity)) then
       local target = self:get_entity_target(entity)
-      local astar_path = self:astar(entity, target.x, target.y)
+      local astar_path = self:astar(entity.x, entity.y, target.x, target.y)
       if (astar_path and not table.empty(astar_path)) then
-        local next_move = astar_path[0]
-        local relative_x = entity.x - next_move[0]
-        local relative_y = entity.y - next_move[1]
+        local next_move = table.shift(astar_path)
+
+        local relative_x = next_move.x - entity.x
+        local relative_y = next_move.y - entity.y
+        debug(relative_x .. "-" .. relative_y)
+
         map_entity_move(self.sector.data.map, entity, relative_x, relative_y)
       else
         debug("couldn't find a path")
@@ -131,38 +134,45 @@ function PlayScreen:get_entity_target(entity)
   return self.sector.player
 end
 
-function PlayScreen:astar(entity, x, y)
-  local visited_stack={}
-  local candidate_stack={{x,y,nil}} -- x, y, parent
-  local x = entity.x
-  local y = entity.y
-  
+function PlayScreen:astar(sx, sy, dx, dy)
+  local visited_map = {}
+  for x,row in ipairs(self.sector.data.map) do
+    visited_map[x] = {}
+    for y,terrain in ipairs(row) do
+      visited_map[x][y] = false
+    end
+  end
+
+  local candidate_stack={{x=sx, y=sy, parent=nil}}
+  visited_map[sx][sy]=true 
+
   while (not table.empty(candidate_stack)) do
     local candidate = table.shift(candidate_stack)
 
-    print(#candidate_stack)
-    -- is this it?
-    if candidate[1] == x and candidate[1] == y then 
+    if candidate.x == dx and candidate.y == dy then 
       return reconstruct_astar_path(candidate)
     end
 
     -- find other candidates
-    local candidates = table.select(neighboring_squares(x,y), function (cell)
-      if xy_inside_map(self.sector.data.map, cell[1], cell[2]) then
-        -- is passable and we haven't already visited it
-        local terrain = self.sector.data.map[cell[1]][cell[2]]
-        return terrain_is_passable(terrain) and not table.detect(visited_stack, function(other_cell) 
-          return other_cell[1] == cell[1] and other_cell[2] == cell[2]
-        end)
+    local neighbors = table.select(neighboring_squares(candidate.x, candidate.y), function (cell)
+      if xy_inside_map(self.sector.data.map, cell.x, cell.y) then
+        -- only keep those which are passable and not already visited
+        local terrain = self.sector.data.map[cell.x][cell.y]
+        return(terrain_is_passable(terrain) and not visited_map[cell.x][cell.y])
       else
         return false
       end
     end)
 
+    -- put them in the stack in priority of closest to the destination
+    table.sort(neighbors, function (a, b) 
+      return math.dist(a.x, a.y, dx, dy) < math.dist(b.x, b.y, dx, dy) 
+    end)
+
     -- add the candidates for later processing
-    table.insert(visited_stack, candidate)
-    for i,v in ipairs(candidates) do
-      table.insert(candidate_stack, {v[1],v[2],candidate})
+    for i,cell in ipairs(neighbors) do
+      visited_map[cell.x][cell.y] = true
+      table.insert(candidate_stack, {x=cell.x, y=cell.y, parent=candidate})
     end
   end
 
@@ -171,27 +181,40 @@ function PlayScreen:astar(entity, x, y)
 end
 
 function xy_inside_map(map, x, y)
-  return between(x, 1, #map) and between(y, 1, #map[x])
+  if (between(x, 1, #map)) then
+    return between(y, 1, #map[x])
+  else
+    return false
+  end
 end
 
-function reconstruct_astar_path(cells)
-  return table.reverse(table.collect(cells, function (cell)
-    return cell[3] 
-  end))
+function reconstruct_astar_path(candidate)
+  local path = {}
+
+  local cell=candidate
+  while (cell.parent) do
+    table.unshift(path, {x=cell.parent.x, y=cell.parent.y})
+    cell = cell.parent
+  end
+
+  -- that first entry contains the starting square
+  table.shift(path)
+
+  return path
 end
 
 function terrain_is_passable(terrain) 
-  return terrain.passable and not terrain.entity
+  return terrain.passable -- and not terrain.entity
 end
 
-function neighboring_squares(x,y)
+function neighboring_squares(x1,y1)
   local relative_neighbors = {
     {-1,-1}, {0, -1}, {1, -1},
     {-1, 0},          {1, 0},
     {-1, 1}, {0,  1} ,{1, 1}}
 
   return table.collect(relative_neighbors, function (pair)
-    return {x + pair[1], y + pair[2]}
+    return {x=x1 + pair[1], y=y1 + pair[2]}
   end)
 end
 

@@ -63,6 +63,14 @@ table.shift = function(list)
   return table.remove(list, 1)
 end
 
+table.pop = function(list)
+  return table.remove(list)
+end
+
+table.push = function(list)
+  return table.insert(list)
+end
+
 table.collect = function(source, func) 
   local result = {}
   for i,v in ipairs(source) do table.insert(result, func(v)) end
