@@ -112,7 +112,6 @@ function PlayScreen:ai(entity)
 
         local relative_x = next_move.x - entity.x
         local relative_y = next_move.y - entity.y
-        debug(relative_x .. "-" .. relative_y)
 
         map_entity_move(self.sector.data.map, entity, relative_x, relative_y)
       else
@@ -153,7 +152,6 @@ function PlayScreen:astar(sx, sy, dx, dy)
     cells_examined = cells_examined + 1
 
     if candidate.x == dx and candidate.y == dy then 
-      debug(cells_examined .. " cells examined")
       return reconstruct_astar_path(candidate)
     end
 
@@ -251,11 +249,13 @@ function PlayScreen:generate_sector()
   local monster1 = create_entity("raider", 50, 20)
   local monster2 = create_entity("raider", 55, 18)
   local monster3 = create_entity("raider", 60, 23)
+  local monster4 = create_entity("raider", 52, 12)
+  local monster5 = create_entity("raider", 54, 14)
   local player = create_entity("player", 10, 10)
 
   self.sector = {
     player=player,
-    entities={player, monster1, monster2, monster3},
+    entities={player, monster1, monster2, monster3, monster4, monster5},
     data={
       current_time=0,
       event_queue={},
