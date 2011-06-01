@@ -265,11 +265,15 @@ end
 function PlayScreen:generate_sector()
   -- add monsters, the player and the map
   local monster1 = create_entity("raider", 50, 20)
+  local monster2 = create_entity("raider", 55, 10)
+  local monster3 = create_entity("raider", 56, 15)
+  local monster4 = create_entity("raider", 57, 25)
+  local monster5 = create_entity("raider", 58, 22)
   local player = create_entity("player", 10, 10)
 
   self.sector = {
     player=player,
-    entities={player, monster1},
+    entities={player, monster1, monster2, monster3, monster4, monster5},
     data={
       current_time=0,
       event_queue={},
