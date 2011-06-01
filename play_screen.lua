@@ -1,13 +1,12 @@
 -- add a state to that class using addState, and re-define the method
 local PlayScreen = ScreenManager:addState('PlayScreen')
+local status_messages = {}
 
 function PlayScreen:enterState() 
   debug("PlayScreen initialized")
   
   local font = love.graphics.newFont("fonts/VeraMono.ttf", 13)
   love.graphics.setFont(font);
-
-  self.status_messages = {}
 end
 
 function PlayScreen:draw()
@@ -62,13 +61,13 @@ end
 
 function PlayScreen:start_new_game()
   self:generate_sector()
-  self:log("You wake to a nightmare.")
-  self:log("Friends, family slaughtered.")
-  self:log("All is in flames.")
+  message("You wake to a nightmare.")
+  message("Friends, family slaughtered.")
+  message("All is in flames.")
 end
 
-function PlayScreen:log(msg)
-  table.insert(self.status_messages, msg)
+function message(msg)
+  table.insert(status_messages, msg)
 end
 
 function PlayScreen:schedule_event(entity, task, ticks)
@@ -209,9 +208,8 @@ function xy_inside_map(map, x, y)
 end
 
 function reconstruct_astar_path(candidate)
-  local path = {}
-
   local cell=candidate
+  local path={{x=cell.x, y=cell.y}}
   while (cell.parent) do
     table.unshift(path, {x=cell.parent.x, y=cell.parent.y})
     cell = cell.parent
@@ -334,9 +332,9 @@ function PlayScreen:draw_status_messages()
   
   local text = ''
 
-  local start_index = clip(#self.status_messages - 10, 1, #self.status_messages)
-  for index = start_index, #self.status_messages do
-    text = text .. self.status_messages[index] .. "\n"
+  local start_index = clip(#status_messages - 10, 1, #status_messages)
+  for index = start_index, #status_messages do
+    text = text .. status_messages[index] .. "\n"
   end
 
   love.graphics.printf(text, app.config.STREAM_MARGIN_LEFT, app.config.STREAM_MARGIN_TOP, app.config.STREAM_WIDTH, "left");
@@ -346,7 +344,7 @@ function PlayScreen:draw_stats()
   love.graphics.setColor(255,255,255)
 
   local stats = {
-    text_indicator("Health", self.sector.player.current_hp, self.sector.player.max_hp),
+    text_indicator("Health", self.sector.player.health, self.sector.player.max_health),
     text_indicator("  Food", 10, 20),
     text_indicator("  Rads", 0, 20),
     "(a) 9mm Semiautomatic Pistol +2/+1",
@@ -391,13 +389,20 @@ function map_entity_move(map, entity, x_offset, y_offset)
   local x = clip(entity.x + x_offset, 1, app.config.MAP_NUM_CELLS_X)
   local y = clip(entity.y + y_offset, 1, app.config.MAP_NUM_CELLS_Y)
 
-  if (terrain_is_passable(map[x][y])and not map[x][y].entity) then
-    map[entity.x][entity.y].entity = nil
-    
-    entity.x = x
-    entity.y = y
+  if terrain_is_passable(map[x][y]) then
+    if map[x][y].entity then
+      message(entity.name .. " hits " .. map[x][y].entity.name)
+      map[x][y].entity.health = map[x][y].entity.health - 1
+    else
+      map[entity.x][entity.y].entity = nil
+      
+      entity.x = x
+      entity.y = y
 
-    map[x][y].entity = entity
+      map[x][y].entity = entity
+    end
+  else
+    debug("goddamn, this terrain isn't passable")
   end
 end
 
@@ -504,16 +509,16 @@ function create_entity(type, x, y)
       name="raider",
       character="@",
       forecolor={246,235,187},
-      max_hp=10,
-      current_hp=10
+      max_health=10,
+      health=10
     })
   elseif type == "player" then
     return table.merge(base, {
       name="player",
       character="@",
       forecolor={120,203,255},
-      max_hp=20,
-      current_hp=18
+      max_health=20,
+      health=18
     })
   end
 end
