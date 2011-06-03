@@ -1,15 +1,15 @@
 -- add a state to that class using addState, and re-define the method
-local PlayScreen = ScreenManager:addState('PlayScreen')
-local status_messages = {}
-
-function PlayScreen:enterState() 
-  debug("PlayScreen initialized")
+local Game = ScreenManager:addState('Game')
+function Game:enterState() 
+  debug("Game initialized")
   
   local font = love.graphics.newFont("fonts/VeraMono.ttf", 13)
   love.graphics.setFont(font);
+
+  self.status_messages = {}
 end
 
-function PlayScreen:draw()
+function Game:draw()
   if self.sector then
     self:draw_map(self)
     self:draw_status_messages(self)
@@ -18,7 +18,7 @@ function PlayScreen:draw()
   end
 end
 
-function PlayScreen:keypressed(key, unicode)
+function Game:keypressed(key, unicode)
   if (key == "q") then
     self:save_sector()
     screen_manager:popState()
@@ -30,28 +30,28 @@ function PlayScreen:keypressed(key, unicode)
     if (key == "s") then
       ends_turn()
     elseif (key == "h") then
-      map_entity_move(self.sector.data.map, self.sector.player, -1, 0)
+      self:move_entity(self.sector.player, -1, 0)
       ends_turn()
     elseif (key == "j") then
-      map_entity_move(self.sector.data.map, self.sector.player, 0, 1)
+      self:move_entity(self.sector.player, 0, 1)
       ends_turn()
     elseif (key == "k") then
-      map_entity_move(self.sector.data.map, self.sector.player, 0, -1)
+      self:move_entity(self.sector.player, 0, -1)
       ends_turn()
     elseif (key == "l") then
-      map_entity_move(self.sector.data.map, self.sector.player, 1, 0)
+      self:move_entity(self.sector.player, 1, 0)
       ends_turn()
     elseif (key == "y") then
-      map_entity_move(self.sector.data.map, self.sector.player, -1, -1)
+      self:move_entity(self.sector.player, -1, -1)
       ends_turn()
     elseif (key == "u") then
-      map_entity_move(self.sector.data.map, self.sector.player, 1, -1)
+      self:move_entity(self.sector.player, 1, -1)
       ends_turn()
     elseif (key == "b") then
-      map_entity_move(self.sector.data.map, self.sector.player, -1, 1)
+      self:move_entity(self.sector.player, -1, 1)
       ends_turn()
     elseif (key == "n") then
-      map_entity_move(self.sector.data.map, self.sector.player, 1, 1)
+      self:move_entity(self.sector.player, 1, 1)
       ends_turn()
     else
       debug("unmapped key:" .. key)
@@ -59,18 +59,18 @@ function PlayScreen:keypressed(key, unicode)
   end
 end
 
-function PlayScreen:start_new_game()
+function Game:start_new_game()
   self:generate_sector()
-  message("You wake to a nightmare.")
-  message("Friends, family slaughtered.")
-  message("All is in flames.")
+  self:message("You wake to a nightmare.")
+  self:message("Friends, family slaughtered.")
+  self:message("All is in flames.")
 end
 
-function message(msg)
-  table.insert(status_messages, msg)
+function Game:message(msg)
+  table.insert(self.status_messages, msg)
 end
 
-function PlayScreen:schedule_event(entity, task, ticks)
+function Game:schedule_event(entity, task, ticks)
   local scheduled_time = self.sector.data.current_time + ticks
   local new_job = {entity=entity, task=task, scheduled_time=scheduled_time}
   for i,job in ipairs(self.sector.data.event_queue) do
@@ -83,13 +83,13 @@ function PlayScreen:schedule_event(entity, task, ticks)
   table.insert(self.sector.data.event_queue, new_job)
 end
 
-function PlayScreen:process_events()
+function Game:process_events()
   while #self.sector.data.event_queue > 0 and not self.sector.data.player_turn do
     self:process_next_event()
   end
 end
 
-function PlayScreen:process_next_event()
+function Game:process_next_event()
   local job = table.shift(self.sector.data.event_queue)
   if job then
     if job.task == "AI" then
@@ -101,7 +101,7 @@ function PlayScreen:process_next_event()
   end
 end
 
-function PlayScreen:ai(entity)
+function Game:ai(entity)
   if (entity.name == "player") then
     self.sector.data.player_turn = true
   elseif (entity.name == "raider") then
@@ -114,7 +114,7 @@ function PlayScreen:ai(entity)
         local relative_x = next_move.x - entity.x
         local relative_y = next_move.y - entity.y
 
-        map_entity_move(self.sector.data.map, entity, relative_x, relative_y)
+        self:move_entity(entity, relative_x, relative_y)
       else
         debug("couldn't find a path")
       end
@@ -123,18 +123,18 @@ function PlayScreen:ai(entity)
     end
     self:schedule_event(entity, "AI", 100)
   elseif (entity.name == "random-walk") then
-    map_entity_move(self.sector.data.map, entity, math.random(-1, 1), math.random(-1, 1))
+    self:move_entity(entity, math.random(-1, 1), math.random(-1, 1))
     self:schedule_event(entity, "AI", 100)
   else
     debug("unknown ai for entity: " .. entity.name)
   end
 end
 
-function PlayScreen:get_entity_target(entity)
+function Game:get_entity_target(entity)
   return self.sector.player
 end
 
-function PlayScreen:astar(sx, sy, dx, dy)
+function Game:astar(sx, sy, dx, dy)
   local visited_map = {}
   for x,row in ipairs(self.sector.data.map) do
     visited_map[x] = {}
@@ -153,18 +153,14 @@ function PlayScreen:astar(sx, sy, dx, dy)
 
     if candidate.x == dx and candidate.y == dy then 
       debug("astar found. cells_examined: " .. cells_examined)
-      return reconstruct_astar_path(candidate)
+      return self:reconstruct_astar_path(candidate)
     end
 
     -- find other candidates
-    local neighbors = table.select(neighboring_squares(candidate.x, candidate.y), function (cell)
-      if xy_inside_map(self.sector.data.map, cell.x, cell.y) then
-        -- only keep those which are passable and not already visited
-        local terrain = self.sector.data.map[cell.x][cell.y]
-        return(terrain_is_passable(terrain) and not visited_map[cell.x][cell.y])
-      else
-        return false
-      end
+    local neighbors = table.select(self:neighboring_squares(candidate.x, candidate.y), function (coordinate)
+      -- only keep those which are passable and not already visited
+      local terrain = self.sector.data.map[coordinate.x][coordinate.y]
+      return(self:terrain_is_passable(terrain) and not visited_map[coordinate.x][coordinate.y])
     end)
 
     -- put them in the stack in priority of closest to the destination
@@ -173,10 +169,10 @@ function PlayScreen:astar(sx, sy, dx, dy)
     end)
 
     -- add the candidates for later processing
-    for i,cell in ipairs(neighbors) do
-      visited_map[cell.x][cell.y] = true
+    for i,coordinate in ipairs(neighbors) do
+      visited_map[coordinate.x][coordinate.y] = true
   
-      local new_candidate = {x=cell.x, y=cell.y, parent=candidate, movement_cost = candidate.movement_cost + 1}
+      local new_candidate = {x=coordinate.x, y=coordinate.y, parent=candidate, movement_cost = candidate.movement_cost + 1}
       local inserted = false
 
       if #candidate_stack > 0 then
@@ -199,15 +195,7 @@ function PlayScreen:astar(sx, sy, dx, dy)
   return nil
 end
 
-function xy_inside_map(map, x, y)
-  if (between(x, 1, #map)) then
-    return between(y, 1, #map[x])
-  else
-    return false
-  end
-end
-
-function reconstruct_astar_path(candidate)
+function Game:reconstruct_astar_path(candidate)
   local cell=candidate
   local path={{x=cell.x, y=cell.y}}
   while (cell.parent) do
@@ -221,28 +209,49 @@ function reconstruct_astar_path(candidate)
   return path
 end
 
-function terrain_is_passable(terrain) 
-  return terrain.passable -- and not terrain.entity
+function Game:terrain_is_passable(terrain) 
+  return terrain.passable
 end
 
-function neighboring_squares(x1,y1)
+function Game:neighboring_squares(x1,y1)
   local relative_neighbors = {
     {-1,-1}, {0, -1}, {1, -1},
     {-1, 0},          {1, 0},
     {-1, 1}, {0,  1} ,{1, 1}}
 
-  return table.collect(relative_neighbors, function (pair)
+  local absolute_neighbors = table.collect(relative_neighbors, function (pair)
     return {x=x1 + pair[1], y=y1 + pair[2]}
+  end)
+
+  return table.select(absolute_neighbors, function (coordinate)
+    return self:coordinate_inside_map(coordinate)
   end)
 end
 
-function PlayScreen:update(dt)
-  if (self.sector.data.event_queue and not self.sector.data.player_turn) then
-    self:process_events() 
+function Game:coordinate_inside_map(coordinate)
+  if (between(coordinate.x, 1, #self.sector.data.map)) then
+    return between(coordinate.y, 1, #self.sector.data.map[coordinate.x])
+  else
+    return false
   end
 end
 
-function PlayScreen:save_sector()
+function Game:update(dt)
+  if self.sector.data.event_queue and not self.sector.data.player_turn then
+    local status, err = pcall(function()
+      self:process_events()
+    end)
+
+    if not status then debug(err) end
+  end
+end
+
+function Game:destroy_saves()
+  debug("removing saves... oh please don't delete anything important")
+  rmdir("saves")
+end
+
+function Game:save_sector()
   mkdir("saves")
 
   local out = assert(io.open(sector_filename(self.sector.data.x, self.sector.data.y), "w"))
@@ -250,7 +259,7 @@ function PlayScreen:save_sector()
   io.close(out)
 end
 
-function PlayScreen:load_sector()
+function Game:load_sector()
   local infile = assert(io.open(sector_filename(0,0), "r"), "Failed to open input file")
   local injson = infile:read("*a")
   
@@ -260,7 +269,7 @@ function PlayScreen:load_sector()
 end
 
 
-function PlayScreen:generate_sector()
+function Game:generate_sector()
   -- add monsters, the player and the map
   local monster1 = create_entity("raider", 50, 20)
   local monster2 = create_entity("raider", 55, 10)
@@ -283,7 +292,7 @@ function PlayScreen:generate_sector()
   }
 
   for i, v in ipairs(self.sector.entities) do
-    map_entity_move(self.sector.data.map, v, 0, 0)
+    self:move_entity(v, 0, 0)
     self:schedule_event(v, "AI", 100)
   end
   
@@ -309,7 +318,7 @@ function sector_index(sector)
   end
 end
 
-function PlayScreen:draw_map()
+function Game:draw_map()
   for x,row in ipairs(self.sector.data.map) do
     for y,terrain in ipairs(row) do
       local forecolor = terrain_top_forecolor(terrain)
@@ -319,28 +328,28 @@ function PlayScreen:draw_map()
   end
 end
 
-function PlayScreen:map_to_pix_x(x)
+function Game:map_to_pix_x(x)
   return (x - 1) * app.config.CELL_WIDTH + app.config.MAP_MARGIN_LEFT
 end
 
-function PlayScreen:map_to_pix_y(y)
+function Game:map_to_pix_y(y)
   return (y - 1) * app.config.CELL_HEIGHT + app.config.MAP_MARGIN_TOP
 end
 
-function PlayScreen:draw_status_messages()
+function Game:draw_status_messages()
   love.graphics.setColor(255,255,255);
   
   local text = ''
 
-  local start_index = clip(#status_messages - 10, 1, #status_messages)
-  for index = start_index, #status_messages do
-    text = text .. status_messages[index] .. "\n"
+  local start_index = clip(#self.status_messages - 10, 1, #self.status_messages)
+  for index = start_index, #self.status_messages do
+    text = text .. self.status_messages[index] .. "\n"
   end
 
   love.graphics.printf(text, app.config.STREAM_MARGIN_LEFT, app.config.STREAM_MARGIN_TOP, app.config.STREAM_WIDTH, "left");
 end
 
-function PlayScreen:draw_stats()
+function Game:draw_stats()
   love.graphics.setColor(255,255,255)
 
   local stats = {
@@ -379,20 +388,23 @@ function text_indicator(label, current, max)
   return label ..": [" .. calc_stars() .. "] " .. current .. "/" .. max
 end
 
-function PlayScreen:draw_fps()
+function Game:draw_fps()
   love.graphics.setColor(150,150,255)
   love.graphics.print("FPS: " .. love.timer.getFPS(), 2, 2)
 end
 
 
-function map_entity_move(map, entity, x_offset, y_offset)
+function Game:move_entity(entity, x_offset, y_offset)
   local x = clip(entity.x + x_offset, 1, app.config.MAP_NUM_CELLS_X)
   local y = clip(entity.y + y_offset, 1, app.config.MAP_NUM_CELLS_Y)
 
-  if terrain_is_passable(map[x][y]) then
-    if map[x][y].entity then
-      message(entity.name .. " hits " .. map[x][y].entity.name)
-      map[x][y].entity.health = map[x][y].entity.health - 1
+  local map = self.sector.data.map
+
+  if self:terrain_is_passable(map[x][y]) then
+    local enemy = map[x][y].entity
+    if enemy then
+      self:message(entity.name .. " hits " .. enemy.name)
+      self:damage_entity(enemy, 1)
     else
       map[entity.x][entity.y].entity = nil
       
@@ -404,6 +416,36 @@ function map_entity_move(map, entity, x_offset, y_offset)
   else
     debug("goddamn, this terrain isn't passable")
   end
+end
+
+function Game:damage_entity(entity, points)
+  entity.health = entity.health - points
+  if self:is_entity_dead(entity) then
+    if self.sector.player == entity then
+      debug("player died")
+      self:destroy_saves()
+
+      screen_manager:popState()
+      screen_manager:pushState("DeadScreen")
+
+
+      -- throw the mother of all exceptions
+      error("player has died")
+    else
+      debug("enemy died")
+      self:message(entity.name .. " was killed")
+      self:remove_entity(entity)
+    end
+  end
+end
+
+function Game:is_entity_dead(entity)
+  return entity.health < 1
+end
+
+function Game:remove_entity(entity)
+  self.sector.data.map[entity.x][entity.y].entity = nil
+  self.sector.entities = table.reject(self.sector.entities, function(x) return entitiy == x end)
 end
 
 -- returns a random map

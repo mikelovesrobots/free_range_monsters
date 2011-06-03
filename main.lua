@@ -9,7 +9,8 @@ require('screen_manager')
 require('main_menu_screen')
 require('morgue_screen')
 require('about_screen')
-require('play_screen')
+require('dead_screen')
+require('game')
 
 DEBUG = true
 

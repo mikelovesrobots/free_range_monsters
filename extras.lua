@@ -3,6 +3,10 @@ function mkdir(dir)
   os.execute("mkdir -p " .. dir)
 end
 
+function rmdir(dir)
+  os.execute("rm -fr " .. dir)
+end
+
 function file_exists(n)
   local f=io.open(n)
   if f then

@@ -93,12 +93,12 @@ function MainMenuScreen:regenerate_target_color()
 end
 
 function MainMenuScreen:continue_previous_game_selected()
-  screen_manager:pushState('PlayScreen')
+  screen_manager:pushState('Game')
   screen_manager:load_sector()
 end
 
 function MainMenuScreen:start_new_game_selected()
-  screen_manager:pushState('PlayScreen')
+  screen_manager:pushState('Game')
   screen_manager:start_new_game()
 end
 
