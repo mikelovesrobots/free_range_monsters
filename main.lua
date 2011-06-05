@@ -19,6 +19,7 @@ function love.load()
   math.randomseed( os.time() )
   
   terrain_db = Library:new('terrain')
+  entities_db = Library:new('entities')
 
   screen_manager = ScreenManager:new() -- this will call initialize and will set the initial menu
 

@@ -506,36 +506,19 @@ end
 
 function create_terrain(type)
   local template = terrain_db:create(type)
-  return {
-    name=template.name,
-    character=template.character,
-    forecolor=template.forecolor,
-    passable=template.passable
-  }
+  return table.dup(template)
+ -- {
+ --   name=template.name,
+ --   character=template.character,
+ --   forecolor=template.forecolor,
+ --   passable=template.passable
+ -- }
 end
 
 function create_entity(type, x, y)
-  local base = {
-    x=x,
-    y=y
-  }
-  if type == "raider" then
-    return table.merge(base, {
-      name="raider",
-      character="@",
-      forecolor={246,235,187},
-      max_health=10,
-      health=10
-    })
-  elseif type == "player" then
-    return table.merge(base, {
-      name="player",
-      character="@",
-      forecolor={120,203,255},
-      max_health=20,
-      health=18
-    })
-  end
+  local base = {x=x, y=y}
+  local template = entities_db:create(type)
+  return table.merge(base, table.dup(template))
 end
 
 function terrain_top_character(terrain)

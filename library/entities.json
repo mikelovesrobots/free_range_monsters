@@ -1,0 +1,17 @@
+{
+  "raider": {
+    "name" : "raider",
+    "character" : "@",
+    "forecolor" : [ 246, 235, 187 ],
+    "max_health" : 10,
+    "health" : 10
+  },
+
+  "player": {
+    "name" : "player",
+    "character" : "@",
+    "forecolor" : [ 120, 203, 255],
+    "max_health" : 20,
+    "health" : 15
+  }
+}

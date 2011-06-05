@@ -86,3 +86,9 @@ table.reverse = function(source)
   for i,v in ipairs(source) do table.unshift(result, v) end
   return result
 end
+
+table.dup = function(source)
+  local result = {}
+  for k,v in pairs(source) do result[k] = v end
+  return result
+end
