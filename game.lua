@@ -403,8 +403,12 @@ function Game:move_entity(entity, x_offset, y_offset)
   if self:terrain_is_passable(map[x][y]) then
     local enemy = map[x][y].entity
     if enemy then
-      self:message(entity.name .. " hits " .. enemy.name)
-      self:damage_entity(enemy, 1)
+      if self:accuracy_check(entity, enemy) then
+        self:message(entity.name .. " hits " .. enemy.name)
+        self:damage_entity(enemy, 1)
+      else
+        self:message(entity.name .. " misses " .. enemy.name)
+      end
     else
       map[entity.x][entity.y].entity = nil
       
@@ -416,6 +420,10 @@ function Game:move_entity(entity, x_offset, y_offset)
   else
     debug("goddamn, this terrain isn't passable")
   end
+end
+
+function Game:accuracy_check(entity, enemy)
+  return 100 - math.random(1,100) > 70
 end
 
 function Game:damage_entity(entity, points)
