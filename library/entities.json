@@ -3,15 +3,29 @@
     "name" : "raider",
     "character" : "@",
     "forecolor" : [ 246, 235, 187 ],
+    "allegiance" : "The Skulls",
     "max_health" : 10,
-    "health" : 10
+    "health" : 10,
+    "ai" : "hostile"
+  },
+  
+  "bruiser": {
+    "name" : "bruiser",
+    "character" : "@",
+    "forecolor" : [ 118, 113, 90 ],
+    "allegiance" : "Hellions",
+    "max_health" : 10,
+    "health" : 10,
+    "ai" : "hostile"
   },
 
   "player": {
     "name" : "player",
     "character" : "@",
     "forecolor" : [ 120, 203, 255],
+    "allegiance" : "Players",
     "max_health" : 20,
-    "health" : 15
+    "health" : 15,
+    "ai" : "player"
   }
 }

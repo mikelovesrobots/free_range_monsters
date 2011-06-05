@@ -78,7 +78,11 @@ table.collect = function(source, func)
 end
 
 table.empty = function(source) 
-  return #source == 0
+  return source == nil or #source == 0
+end
+
+table.present = function(source)
+  return not table.empty(source)
 end
 
 table.reverse = function(source)

@@ -102,9 +102,9 @@ function Game:process_next_event()
 end
 
 function Game:ai(entity)
-  if (entity.name == "player") then
+  if (entity.ai == "player") then
     self.sector.data.player_turn = true
-  elseif (entity.name == "raider") then
+  elseif (entity.ai == "hostile") then
     if (self:get_entity_target(entity)) then
       local target = self:get_entity_target(entity)
       local astar_path = self:astar(entity.x, entity.y, target.x, target.y)
@@ -122,7 +122,7 @@ function Game:ai(entity)
       debug("couldn't find a target")
     end
     self:schedule_event(entity, "AI", 100)
-  elseif (entity.name == "random-walk") then
+  elseif (entity.ai == "random-walk") then
     self:move_entity(entity, math.random(-1, 1), math.random(-1, 1))
     self:schedule_event(entity, "AI", 100)
   else
@@ -131,7 +131,28 @@ function Game:ai(entity)
 end
 
 function Game:get_entity_target(entity)
-  return self.sector.player
+  local nearby_entities = self:entities_nearby(entity, 10)
+  if table.present(nearby_entities) then
+    local hostiles = table.reject(nearby_entities, function(target)
+      return target.allegiance == entity.allegiance
+    end)
+
+    if #hostiles > 0 then
+      return hostiles[1]
+    else
+      return nil
+    end
+  else
+    return nil
+  end
+end
+
+function Game:entities_nearby(entity, range)
+  local results = table.select(self.sector.entities, function(target) 
+    return (math.dist(entity.x, entity.y, target.x, target.y) <= range) and (target ~= entity)
+  end)
+
+  return results
 end
 
 function Game:astar(sx, sy, dx, dy)
@@ -270,14 +291,12 @@ function Game:generate_sector()
   -- add monsters, the player and the map
   local monster1 = create_entity("raider", 50, 20)
   local monster2 = create_entity("raider", 55, 10)
-  local monster3 = create_entity("raider", 56, 15)
-  local monster4 = create_entity("raider", 57, 25)
-  local monster5 = create_entity("raider", 58, 22)
+  local monster3 = create_entity("bruiser", 56, 8)
   local player = create_entity("player", 10, 10)
 
   self.sector = {
     player=player,
-    entities={player, monster1, monster2, monster3, monster4, monster5},
+    entities={player, monster1, monster2, monster3},
     data={
       current_time=0,
       event_queue={},
@@ -420,7 +439,7 @@ function Game:move_entity(entity, x_offset, y_offset)
 end
 
 function Game:accuracy_check(entity, enemy)
-  return 100 - math.random(1,100) > 70
+  return math.random(1,100) > 100 - 70
 end
 
 function Game:damage_entity(entity, points)
@@ -451,6 +470,9 @@ end
 function Game:remove_entity(entity)
   self.sector.data.map[entity.x][entity.y].entity = nil
   self.sector.entities = table.reject(self.sector.entities, function(x) return entitiy == x end)
+  self.sector.data.event_queue = table.reject(self.sector.data.event_queue, function(job)
+    return job.entity == entity
+  end)
 end
 
 -- returns a random map
