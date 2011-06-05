@@ -1,0 +1,32 @@
+{
+  "dirt" : { 
+    "character" : ".",
+    "forecolor" : [ 221, 78, 35 ],
+      "name" : "dirt",
+      "passable" : true
+  },
+  "lane_marker" : { 
+    "character" : ":",
+    "forecolor" : [ 248, 202, 0 ],
+    "name" : "lane marker",
+    "passable" : true
+  },
+  "road" : { 
+    "character" : "|",
+    "forecolor" : [ 246, 235, 187 ],
+    "name" : "lane marker",
+    "passable" : true
+  },
+  "rock" : { 
+    "character" : "^",
+    "forecolor" : [ 162, 165, 108 ],
+    "name" : "rock",
+    "passable" : false
+  },
+  "rubble" : { 
+    "name" : "rubble",
+    "character" : "~",
+    "forecolor" : [ 221, 78, 35 ],
+    "passable" : true
+  }
+}

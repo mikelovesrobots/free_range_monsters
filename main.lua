@@ -5,6 +5,7 @@ json = require('json/dkjson')
 
 require('config')
 require('extras')
+require('library')
 require('screen_manager')
 require('main_menu_screen')
 require('morgue_screen')
@@ -16,7 +17,11 @@ DEBUG = true
 
 function love.load()
   math.randomseed( os.time() )
+  
+  terrain_db = Library:new('terrain')
+
   screen_manager = ScreenManager:new() -- this will call initialize and will set the initial menu
+
 end
 
 function love.draw()

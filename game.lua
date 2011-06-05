@@ -260,11 +260,8 @@ function Game:save_sector()
 end
 
 function Game:load_sector()
-  local infile = assert(io.open(sector_filename(0,0), "r"), "Failed to open input file")
-  local injson = infile:read("*a")
-  
   self.sector = {}
-  self.sector.data = json.decode(injson)
+  self.sector.data = json.load_from_file(sector_filename(0,0))
   sector_index(self.sector)
 end
 
@@ -467,7 +464,7 @@ function generate_map()
         table.insert(row, create_terrain("road"))
       elseif x == 22 then
         if y % 2 == 1 and math.random(1,4) <= 3 then
-          table.insert(row, create_terrain("lane marker"))
+          table.insert(row, create_terrain("lane_marker"))
         else 
           table.insert(row, create_terrain("road"))
         end
@@ -507,46 +504,14 @@ function clip(i, min, max)
   end
 end
 
-
-function create_terrain(name)
-  if name == "road" then
-    return {
-      name="road",
-      character='|',
-      forecolor={246,235,187},
-      passable=true
-    }
-  elseif name == "lane marker" then
-    return {
-      name="lane marker",
-      character=':',
-      forecolor={248,202,0},
-      passable=true
-    }
-  elseif name == "dirt" then
-    return {
-      name="dirt",
-      character='.',
-      forecolor={221,78,35},
-      passable=true
-    }
-  elseif name == "rubble" then
-    return {
-      name="rubble",
-      character='~',
-      forecolor={221,78,35},
-      passable=true
-    }
-  elseif name == "rock" then
-    return {
-      name="rock",
-      character='^',
-      forecolor={162,165,108},
-      passable=false
-    }
-  else
-    print("unknown terrain type: " .. name)
-  end
+function create_terrain(type)
+  local template = terrain_db:create(type)
+  return {
+    name=template.name,
+    character=template.character,
+    forecolor=template.forecolor,
+    passable=template.passable
+  }
 end
 
 function create_entity(type, x, y)
