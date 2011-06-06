@@ -6,6 +6,7 @@ json = require('json/dkjson')
 require('config')
 require('extras')
 require('library')
+require('flavor_text')
 require('screen_manager')
 require('main_menu_screen')
 require('morgue_screen')
@@ -20,6 +21,7 @@ function love.load()
   
   terrain_db = Library:new('terrain')
   entities_db = Library:new('entities')
+  flavor_text_db = FlavorText:new('flavor_text')
 
   screen_manager = ScreenManager:new() -- this will call initialize and will set the initial menu
 

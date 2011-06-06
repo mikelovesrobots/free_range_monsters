@@ -1,0 +1,14 @@
+{
+  "unarmed_hit": [
+    "{entity_name} hits {enemy_name}",
+    "{entity_name} backhands {enemy_name}",
+    "{entity_name} kicks {enemy_name}",
+    "{entity_name} uppercuts {enemy_name}",
+    "{entity_name} strikes {enemy_name}",
+    "{entity_name} punches {enemy_name}"
+  ],
+  "unarmed_miss": [
+    "{entity_name} misses {enemy_name}",
+    "{entity_name} could not hit {enemy_name}"
+  ]
+}

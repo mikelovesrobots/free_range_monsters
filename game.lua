@@ -66,6 +66,11 @@ function Game:start_new_game()
   self:message("All is in flames.")
 end
 
+function Game:flavor_message(name, vars)
+  local flavor_text = flavor_text_db:create(name, vars)
+  self:message(flavor_text)
+end
+
 function Game:message(msg)
   table.insert(self.status_messages, msg)
 end
@@ -420,10 +425,10 @@ function Game:move_entity(entity, x_offset, y_offset)
     local enemy = map[x][y].entity
     if enemy then
       if self:accuracy_check(entity, enemy) then
-        self:message(entity.name .. " hits " .. enemy.name)
+        self:flavor_message("unarmed_hit", {entity_name=entity.name, enemy_name=enemy.name})
         self:damage_entity(enemy, 1)
       else
-        self:message(entity.name .. " misses " .. enemy.name)
+        self:flavor_message("unarmed_miss", {entity_name=entity.name, enemy_name=enemy.name})
       end
     else
       map[entity.x][entity.y].entity = nil

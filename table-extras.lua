@@ -85,6 +85,10 @@ table.present = function(source)
   return not table.empty(source)
 end
 
+table.random = function(source)
+  return source[math.random(1, #source)]
+end
+
 table.reverse = function(source)
   local result = {}
   for i,v in ipairs(source) do table.unshift(result, v) end
