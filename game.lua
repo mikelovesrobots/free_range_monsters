@@ -53,6 +53,8 @@ function Game:keypressed(key, unicode)
     elseif (key == "n") then
       self:move_entity(self.sector.player, 1, 1)
       ends_turn()
+    elseif (key == ",") then
+      self:pickup_item(self.sector.player)
     else
       debug("unmapped key:" .. key)
     end
@@ -121,10 +123,10 @@ function Game:ai(entity)
 
         self:move_entity(entity, relative_x, relative_y)
       else
-        debug("couldn't find a path")
+        --debug("couldn't find a path")
       end
     else
-      debug("couldn't find a target")
+      --debug("couldn't find a target")
     end
     self:schedule_event(entity, "AI", 100)
   elseif (entity.ai == "random-walk") then
@@ -141,7 +143,7 @@ function Game:get_entity_target(entity)
     local hostiles = table.reject(nearby_entities, function(target)
       return target.allegiance == entity.allegiance
     end)
-
+    
     if #hostiles > 0 then
       return hostiles[1]
     else
@@ -297,12 +299,14 @@ function Game:generate_sector()
   local monster1 = create_entity("raider", 50, 20)
   local monster2 = create_entity("raider", 55, 10)
   local monster3 = create_entity("bruiser", 56, 8)
+  local monster4 = create_entity("bruiser", 58, 5)
+  local monster5 = create_entity("bruiser", 56, 10)
   local player = create_entity("player", 10, 10)
   local item = create_item("board_with_nail")
 
   self.sector = {
     player=player,
-    entities={player, monster1, monster2, monster3},
+    entities={player, monster1, monster2, monster3, monster4, monster5},
     data={
       current_time=0,
       event_queue={},
@@ -380,11 +384,17 @@ function Game:draw_stats()
     text_indicator("Health", self.sector.player.health, self.sector.player.max_health),
     text_indicator("  Food", 10, 20),
     text_indicator("  Rads", 0, 20),
-    "(a) 9mm Semiautomatic Pistol +2/+1",
-    "        -- 7/9 rounds chambered",
-    "(b) Board with a nail in it +1/+1",
-    "Current Time: " .. self.sector.data.current_time
   }
+
+  if table.present(self.sector.player.items) then
+     table.push(stats, "(a) " .. self.sector.player.items[1].name) 
+
+     if self.sector.player.items[2] then
+       table.push(stats, "(b) " .. self.sector.player.items[2].name) 
+     end
+  end
+
+  table.push(stats, "Current Time: " .. self.sector.data.current_time)
 
   for i,text in ipairs(stats) do
     love.graphics.print(text, app.config.STATS_MARGIN_LEFT, app.config.STATS_MARGIN_TOP + (20 * (i - 1)))
@@ -428,8 +438,13 @@ function Game:move_entity(entity, x_offset, y_offset)
     local enemy = map[x][y].entity
     if enemy then
       if self:accuracy_check(entity, enemy) then
-        self:flavor_message("unarmed_hit", {entity_name=entity.name, enemy_name=enemy.name})
-        self:damage_entity(enemy, 1)
+        if table.present(entity.items) then
+          self:flavor_message(entity.items[1].flavor_text_on_hit, {entity_name=entity.name, enemy_name=enemy.name})
+          self:damage_entity(enemy, entity.items[1].base_damage)
+        else
+          self:flavor_message("unarmed_hit", {entity_name=entity.name, enemy_name=enemy.name})
+          self:damage_entity(enemy, 1)
+        end
       else
         self:flavor_message("unarmed_miss", {entity_name=entity.name, enemy_name=enemy.name})
       end
@@ -447,6 +462,22 @@ function Game:move_entity(entity, x_offset, y_offset)
     end
   else
     debug("goddamn, this terrain isn't passable")
+  end
+end
+
+function Game:pickup_item(entity)
+  local terrain = self.sector.data.map[entity.x][entity.y]
+  if terrain.item then
+    local item_in_inventory = table.detect(entity.items, function (x) return x.name == terrain.item.name end)
+    if item_in_inventory then
+      item_in_inventory.quantity = item_in_inventory.quantity + 1
+      self:flavor_message("added_to_stack", {item_name=terrain.item.name})
+    else
+      table.push(entity.items, terrain.item)
+      self:flavor_message("added_to_inventory", {item_name=terrain.item.name})
+    end
+
+    terrain.item = nil
   end
 end
 
@@ -481,7 +512,7 @@ end
 
 function Game:remove_entity(entity)
   self.sector.data.map[entity.x][entity.y].entity = nil
-  self.sector.entities = table.reject(self.sector.entities, function(x) return entitiy == x end)
+  self.sector.entities = table.reject(self.sector.entities, function(x) return entity == x end)
   self.sector.data.event_queue = table.reject(self.sector.data.event_queue, function(job)
     return job.entity == entity
   end)
@@ -504,21 +535,19 @@ function generate_map()
         end
       elseif (x == 19 or x == 25) and math.random(1,4) <= 3 then
         table.insert(row, create_terrain("road"))
-      else
-        if (x == 13) then
-          if math.random(1,10) == 1 then
-            table.insert(row, create_terrain("rubble"))
-          else
-            table.insert(row, create_terrain("rock"))
-          end
+      elseif (x == 18 or x == 26) then
+        if math.random(1,5) == 1 then
+          table.insert(row, create_terrain("rubble"))
         else
-          if math.random(1,10) == 1 then
-            table.insert(row, create_terrain("rubble"))
-          elseif math.random(1,30) == 1 then
-            table.insert(row, create_terrain("rock"))
-          else
-            table.insert(row, create_terrain("dirt"))
-          end
+          table.insert(row, create_terrain("rock"))
+        end
+      else
+        if math.random(1,10) == 1 then
+          table.insert(row, create_terrain("rubble"))
+        elseif math.random(1,30) == 1 then
+          table.insert(row, create_terrain("rock"))
+        else
+          table.insert(row, create_terrain("dirt"))
         end
       end
     end
@@ -550,7 +579,7 @@ function create_terrain(type)
 end
 
 function create_entity(type, x, y)
-  local base = {x=x, y=y}
+  local base = {x=x, y=y, items={}}
   local template = entities_db:create(type)
   return table.merge(base, template)
 end

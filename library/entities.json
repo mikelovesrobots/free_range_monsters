@@ -26,6 +26,6 @@
     "allegiance" : "Players",
     "max_health" : 20,
     "health" : 15,
-    "ai" : "player"
+    "ai" : "player",
   }
 }

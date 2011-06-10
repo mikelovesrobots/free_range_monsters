@@ -5,7 +5,8 @@
     "{entity_name} kicks {enemy_name}",
     "{entity_name} uppercuts {enemy_name}",
     "{entity_name} strikes {enemy_name}",
-    "{entity_name} punches {enemy_name}"
+    "{entity_name} punches {enemy_name}",
+    "{entity_name} elbows {enemy_name}"
   ],
   "unarmed_miss": [
     "{entity_name} misses {enemy_name}",
@@ -13,5 +14,17 @@
   ],
   "see_item": [
     "there is a {item_name} here"
+  ],
+  "added_to_stack": [
+    "added {item_name} to stack in inventory"
+  ],
+  "added_to_inventory": [
+    "{item_name} was added to your inventory",
+    "picked up {item_name}"
+  ],
+  "blunt_hit": [
+    "{entity_name} smashes {enemy_name}"
+    "{entity_name} slams {enemy_name}",
+    "{entity_name} crushes {enemy_name}"
   ]
 }

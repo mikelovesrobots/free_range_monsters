@@ -67,8 +67,8 @@ table.pop = function(list)
   return table.remove(list)
 end
 
-table.push = function(list)
-  return table.insert(list)
+table.push = function(list, item)
+  return table.insert(list, item)
 end
 
 table.collect = function(source, func) 
