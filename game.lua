@@ -298,6 +298,7 @@ function Game:generate_sector()
   local monster2 = create_entity("raider", 55, 10)
   local monster3 = create_entity("bruiser", 56, 8)
   local player = create_entity("player", 10, 10)
+  local item = create_item("board_with_nail")
 
   self.sector = {
     player=player,
@@ -311,6 +312,8 @@ function Game:generate_sector()
       map=generate_map()
     }
   }
+
+  self.sector.data.map[20][20].item = item
 
   for i, v in ipairs(self.sector.entities) do
     self:move_entity(v, 0, 0)
@@ -437,6 +440,10 @@ function Game:move_entity(entity, x_offset, y_offset)
       entity.y = y
 
       map[x][y].entity = entity
+
+      if entity == self.sector.player and map[x][y].item then
+        self:flavor_message("see_item", {item_name=map[x][y].item.name})
+      end
     end
   else
     debug("goddamn, this terrain isn't passable")
@@ -545,7 +552,19 @@ end
 function create_entity(type, x, y)
   local base = {x=x, y=y}
   local template = entities_db:create(type)
-  return table.merge(base, table.dup(template))
+  return table.merge(base, template)
+end
+
+function create_item(type)
+  local base = {
+    affinity = 0, 
+    quantity = 0, 
+    required_skills = {}, 
+    bonus_skills = {}, 
+    quality_score = math.random(-2, 2)
+  }
+  local template = items_db:create(type)
+  return table.merge(base, template)
 end
 
 function terrain_top_character(terrain)
@@ -557,6 +576,6 @@ function terrain_top_forecolor(terrain)
 end
 
 function terrain_top_entity(terrain)
-  return terrain.entity or terrain
+  return terrain.entity or terrain.item or terrain
 end
 

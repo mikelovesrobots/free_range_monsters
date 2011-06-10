@@ -51,8 +51,8 @@ table.inject = function(list, value, func)
 end
 
 table.merge = function(source, destination)
-  for k,v in pairs(source) do destination[k] = v end
-  return destination
+  for k,v in pairs(destination) do source[k] = v end
+  return source
 end
 
 table.unshift = function(list, val)
@@ -78,11 +78,11 @@ table.collect = function(source, func)
 end
 
 table.empty = function(source) 
-  return source == nil or #source == 0
+  return source == nil or next(source) == nil
 end
 
 table.present = function(source)
-  return not table.empty(source)
+  return not(table.empty(source))
 end
 
 table.random = function(source)

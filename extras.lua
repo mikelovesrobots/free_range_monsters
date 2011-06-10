@@ -33,5 +33,9 @@ json.load_from_file = function(path)
   local infile = assert(io.open(path, "r"), "Failed to open input file: " .. path)
   local injson = infile:read("*a")
   local result = json.decode(injson)
-  return result
+  if table.present(result) then
+    return result
+  else 
+    error("Couldn't properly parse json: " .. path)
+  end
 end

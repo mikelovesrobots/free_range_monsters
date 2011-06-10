@@ -7,7 +7,13 @@ end
 function Library:create(name)
   local definition = self.db[name]
   if definition then
-    return definition
+    -- oooh, magic inheritance of doom
+    if definition.base then
+      local base = self:create(definition.base)
+      return table.merge(base, definition)
+    else
+      return definition
+    end
   else
     error("No known template type " .. name .. " in " .. self.name .. " library")
   end

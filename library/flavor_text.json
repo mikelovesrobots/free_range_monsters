@@ -10,5 +10,8 @@
   "unarmed_miss": [
     "{entity_name} misses {enemy_name}",
     "{entity_name} could not hit {enemy_name}"
+  ],
+  "see_item": [
+    "there is a {item_name} here"
   ]
 }
