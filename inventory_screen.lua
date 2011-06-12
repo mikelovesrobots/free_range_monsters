@@ -9,7 +9,7 @@ function InventoryScreen:enterState()
   self.prompt = {
     default = "(d)rop, (r)eorder, (s)alvage, (c)onstruct",
     drop = "Select the items to drop then hit enter to finish",
-    reorder = "Select the pair of items to swap",
+    reorder = "Select a second item to swap with",
     salvage = "Select the item to disassemble (salvage) then hit enter to finish",
     reorder = "Select the items to construct then enter to finish",
   }
@@ -46,6 +46,8 @@ function InventoryScreen:keypressed(key, unicode)
     self:keypressed_default(key, unicode)
   elseif self.mode == "drop" then
     self:keypressed_drop(key, unicode)
+  elseif self.mode == "reorder" then
+    self:keypressed_reorder(key, unicode)
   else
     error("unsupported keypress mode")
   end
@@ -55,10 +57,9 @@ function InventoryScreen:keypressed_default(key, unicode)
   if (key == "escape") then
     screen_manager:popState()
   elseif (key == "d") then
-    -- drop
     self.mode = "drop"
   elseif (key == "r") then
-    -- reorder
+    self.mode = "reorder"
   elseif (key == "s") then
     -- salvage
   elseif (key == "c") then
@@ -75,11 +76,10 @@ function InventoryScreen:keypressed_drop(key, unicode)
     end)
 
     table.each(matches, function (item) self:drop_item(self.sector.player, item) end)
-
     self.sector.player.items = rejects
+
     self.selected_items = {}
     self.mode = "default"
-   
   elseif (string.len(key) == 1 and string.match(key, "%a")) then
     -- any single letter
     local i = string.find(InventoryScreen.LETTERS, string.lower(key))
@@ -89,4 +89,26 @@ function InventoryScreen:keypressed_drop(key, unicode)
   else
     debug("unknown key: " .. key)
   end
+end
+
+function InventoryScreen:keypressed_reorder(key, unicode)
+  if (key == "escape") then
+    self.selected_items = {}
+    self.mode = "default"
+  elseif (string.len(key) == 1 and string.match(key, "%a")) then
+    -- any single letter
+    local i = string.find(InventoryScreen.LETTERS, string.lower(key))
+    if #self.player.items >= i then
+      table.push(self.selected_items, i)
+    end
+
+    if #self.selected_items == 2 then
+      self.player.items[self.selected_items[1]], self.player.items[self.selected_items[2]] = self.player.items[self.selected_items[2]], self.player.items[self.selected_items[1]]
+      self.selected_items = {}
+      self.mode = "default"
+    end
+  else
+    debug("unknown key: " .. key)
+  end
+
 end
