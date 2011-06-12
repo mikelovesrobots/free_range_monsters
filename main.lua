@@ -12,6 +12,7 @@ require('main_menu_screen')
 require('morgue_screen')
 require('about_screen')
 require('dead_screen')
+require('inventory_screen')
 require('game')
 
 DEBUG = true

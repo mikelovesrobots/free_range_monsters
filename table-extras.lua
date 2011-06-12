@@ -9,7 +9,7 @@ end
 
 table.detect = function(list, func)
   for i,x in ipairs(list) do
-    if (func(x)) then
+    if (func(x, i)) then
       return(x)
     end
   end
@@ -18,14 +18,14 @@ end
 
 table.each = function(list, func)
   for i,v in ipairs(list) do
-    func(v)
+    func(v, i)
   end
 end
 
 table.select = function(list, func)
   local results = {}
   for i,x in ipairs(list) do
-    if (func(x)) then
+    if (func(x, i)) then
       table.insert(results, x)
     end
   end
@@ -35,11 +35,26 @@ end
 table.reject = function(list, func)
   local results = {}
   for i,x in ipairs(list) do
-    if (func(x) == false) then
+    if (func(x, i) == false) then
       table.insert(results, x)
     end
   end
   return(results)
+end
+
+table.partition = function(list, func)
+  local matches = {}
+  local rejects = {}
+  
+  for i,x in ipairs(list) do
+    if (func(x, i)) then
+      table.insert(matches, x)
+    else
+      table.insert(rejects, x)
+    end
+  end
+  
+  return matches, rejects
 end
 
 table.inject = function(list, value, func)

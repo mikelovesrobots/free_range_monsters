@@ -17,5 +17,45 @@
     "recharges_item" : null,
     "min_strikes_per_attack" : 1,
     "max_strikes_per_attack" : 1
+  },
+
+  "board" : {
+    "name" : "board",
+    "character" : "/",
+    "forecolor" : [ 172, 65, 1 ],
+    "quantity" : 1,
+    "description" : "A piece of wood, probably ash, maybe poplar.  You could build something with this.",
+    "marketvalue" : 1,
+    "required_skills" : [],
+    "flags" : [],
+    "base_range" : 1,
+    "base_damage" : 2,
+    "flavor_text_on_hit" : "blunt_hit",
+    "max_charges" : 0,
+    "current_charges" : 0,
+    "salvages_into" : [ ],
+    "recharges_item" : null,
+    "min_strikes_per_attack" : 1,
+    "max_strikes_per_attack" : 1
+  },
+
+  "nails" : {
+    "name" : "nails",
+    "character" : "%",
+    "forecolor" : [ 121, 101, 61 ],
+    "quantity" : 1,
+    "description" : "A handful of nails.  You could build something with this.",
+    "marketvalue" : 1,
+    "required_skills" : [],
+    "flags" : [],
+    "base_range" : 1,
+    "base_damage" : 3,
+    "flavor_text_on_hit" : "blunt_hit",
+    "max_charges" : 0,
+    "current_charges" : 0,
+    "salvages_into" : [ ],
+    "recharges_item" : null,
+    "min_strikes_per_attack" : 1,
+    "max_strikes_per_attack" : 1
   }
 }

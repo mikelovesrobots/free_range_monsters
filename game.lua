@@ -55,6 +55,9 @@ function Game:keypressed(key, unicode)
       ends_turn()
     elseif (key == ",") then
       self:pickup_item(self.sector.player)
+    elseif (key == "i") then
+      screen_manager:pushState("InventoryScreen")
+      screen_manager.player = self.sector.player
     else
       debug("unmapped key:" .. key)
     end
@@ -163,19 +166,13 @@ function Game:entities_nearby(entity, range)
 end
 
 function Game:astar(sx, sy, dx, dy)
-  local visited_map = {}
-  for x,row in ipairs(self.sector.data.map) do
-    visited_map[x] = {}
-    for y,terrain in ipairs(row) do
-      visited_map[x][y] = false
-    end
-  end
+  local visited_map = self:create_empty_boolean_map()
 
   local candidate_stack={{x=sx, y=sy, parent=nil, movement_cost=0}}
   local cells_examined = 0
   visited_map[sx][sy]=true 
 
-  while (not table.empty(candidate_stack)) do
+  while (table.present(candidate_stack)) do
     local candidate = table.pop(candidate_stack)
     cells_examined = cells_examined + 1
 
@@ -185,7 +182,7 @@ function Game:astar(sx, sy, dx, dy)
     end
 
     -- find other candidates
-    local neighbors = table.select(self:neighboring_squares(candidate.x, candidate.y), function (coordinate)
+    local neighbors = table.select(self:neighboring_coordinates(candidate.x, candidate.y), function (coordinate)
       -- only keep those which are passable and not already visited
       local terrain = self.sector.data.map[coordinate.x][coordinate.y]
       return(self:terrain_is_passable(terrain) and not visited_map[coordinate.x][coordinate.y])
@@ -222,6 +219,17 @@ function Game:astar(sx, sy, dx, dy)
   -- unreachable from here
   return nil
 end
+ 
+function Game:create_empty_boolean_map()
+  local map = {}
+  for x,row in ipairs(self.sector.data.map) do
+    map[x] = {}
+    for y,terrain in ipairs(row) do
+      map[x][y] = false
+    end
+  end
+  return map
+end
 
 function Game:reconstruct_astar_path(candidate)
   local cell=candidate
@@ -237,11 +245,36 @@ function Game:reconstruct_astar_path(candidate)
   return path
 end
 
+function Game:nearest_walkable_empty_coordinate(x,y)
+  local candidates = {{x=x,y=y}}
+  local visited_map = self:create_empty_boolean_map()
+
+  local candidates_examined = 0
+  while (table.present(candidates)) do
+    candidates_examined = candidates_examined + 1
+    local candidate = table.pop(candidates)
+    local terrain = self.sector.data.map[candidate.x][candidate.y]
+    if (self:terrain_is_passable(terrain) and not terrain.item) then
+      return candidate
+    else
+      for i,neighboring_coord in ipairs(self:neighboring_coordinates(candidate.x, candidate.y)) do
+        if (not(visited_map[candidate.x][candidate.y] or table.detect(candidates, function(coord) return coord.x == neighboring_coord.x and coord.y == neighboring_coord.y end))) then
+          table.unshift(candidates, neighboring_coord)
+        end
+      end
+
+      visited_map[candidate.x][candidate.y] = true
+    end
+  end
+
+  return nil
+end
+
 function Game:terrain_is_passable(terrain) 
   return terrain.passable
 end
 
-function Game:neighboring_squares(x1,y1)
+function Game:neighboring_coordinates(x1,y1)
   local relative_neighbors = {
     {-1,-1}, {0, -1}, {1, -1},
     {-1, 0},          {1, 0},
@@ -253,6 +286,12 @@ function Game:neighboring_squares(x1,y1)
 
   return table.select(absolute_neighbors, function (coordinate)
     return self:coordinate_inside_map(coordinate)
+  end)
+end
+
+function Game:neighboring_terrain(x,y)
+  return table.collect(self:neighboring_coordinates(x, y), function (coordinate) 
+    return self.sector.data.map[coordinate.x][coordinate.y] 
   end)
 end
 
@@ -302,7 +341,9 @@ function Game:generate_sector()
   local monster4 = create_entity("bruiser", 58, 5)
   local monster5 = create_entity("bruiser", 56, 10)
   local player = create_entity("player", 10, 10)
-  local item = create_item("board_with_nail")
+  local item1 = create_item("board_with_nail")
+  local item2 = create_item("board")
+  local item3 = create_item("nails")
 
   self.sector = {
     player=player,
@@ -317,7 +358,9 @@ function Game:generate_sector()
     }
   }
 
-  self.sector.data.map[20][20].item = item
+  self.sector.data.map[20][20].item = item1
+  self.sector.data.map[19][19].item = item2
+  self.sector.data.map[21][21].item = item3
 
   for i, v in ipairs(self.sector.entities) do
     self:move_entity(v, 0, 0)
@@ -462,6 +505,32 @@ function Game:move_entity(entity, x_offset, y_offset)
     end
   else
     debug("goddamn, this terrain isn't passable")
+  end
+end
+
+function Game:drop_item(entity, item)
+  self:remove_item_from_entity(entity, item)
+  self:place_item(item, entity.x, entity.y)
+end
+
+function Game:remove_item_from_entity(entity, item)
+  entity.items = table.reject(entity.items, function (inventory_item) return inventory_item == item end)
+end
+
+function Game:place_item(item, x, y)
+  if self.sector.data.map[x][y].item then
+    -- there's already something there.  Gotta drop it nearby
+    local coordinate = self:nearest_walkable_empty_coordinate(x,y)
+    if coordinate then
+      debug("space is full")
+      self.sector.data.map[coordinate.x][coordinate.y].item = item
+    else
+      -- item is lost, there's nowhere to fucking put it
+      debug("nowhere to fucking drop it")
+    end
+  else
+    debug("dropping it here")
+    self.sector.data.map[x][y].item = item
   end
 end
 
