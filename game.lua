@@ -431,10 +431,6 @@ function Game:draw_stats()
 
   if table.present(self.sector.player.items) then
      table.push(stats, "(a) " .. self.sector.player.items[1].name) 
-
-     if self.sector.player.items[2] then
-       table.push(stats, "(b) " .. self.sector.player.items[2].name) 
-     end
   end
 
   table.push(stats, "Current Time: " .. self.sector.data.current_time)
