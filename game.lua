@@ -7,6 +7,7 @@ function Game:enterState()
   love.graphics.setFont(font);
 
   self.status_messages = {}
+  self.effects_queue = {}
 end
 
 function Game:draw()
@@ -304,6 +305,8 @@ function Game:coordinate_inside_map(coordinate)
 end
 
 function Game:update(dt)
+  self:expire_effects(dt)
+
   if self.sector.data.event_queue and not self.sector.data.player_turn then
     local status, err = pcall(function()
       self:process_events()
@@ -311,6 +314,13 @@ function Game:update(dt)
 
     if not status then debug(err) end
   end
+end
+
+function Game:expire_effects(dt)
+  table.each(self.effects_queue, function (effect) effect.time = effect.time - dt end)
+  local expired_effects, live_effects = table.partition(self.effects_queue, function (x) return x.time < 0 end)
+  self.effects_queue = live_effects
+  table.each(expired_effects, function (effect) effect.entity.effect = nil end)
 end
 
 function Game:destroy_saves()
@@ -552,6 +562,24 @@ end
 
 function Game:damage_entity(entity, points)
   entity.health = entity.health - points
+
+  local pct = entity.health / entity.max_health
+  entity.effect = {character="*"}
+  if pct <= 0.20 then
+    entity.effect.forecolor = {232, 87, 76}
+  elseif pct > 0.20 and pct <= 0.40 then
+    entity.effect.forecolor = {242, 123, 41}
+  elseif pct > 0.40 and pct <= 0.60 then
+    entity.effect.forecolor = {229, 165, 27}
+  elseif pct > 0.60 and pct <= 0.80 then
+    entity.effect.forecolor = {217, 204, 60}
+  elseif pct > 0.80 and pct <= 0.95 then
+    entity.effect.forecolor = {57, 153, 119}
+  elseif pct > 0.95 then
+    entity.effect.forecolor = {255, 255, 255}
+  end
+  self:add_effect(entity, 0.5)
+
   if self:is_entity_dead(entity) then
     if self.sector.player == entity then
       debug("player died")
@@ -569,6 +597,10 @@ function Game:damage_entity(entity, points)
       self:remove_entity(entity)
     end
   end
+end
+
+function Game:add_effect(entity, time)
+  table.insert(self.effects_queue, {entity=entity, time=time})
 end
 
 function Game:is_entity_dead(entity)
@@ -670,6 +702,6 @@ function terrain_top_forecolor(terrain)
 end
 
 function terrain_top_entity(terrain)
-  return terrain.entity or terrain.item or terrain
+  return (terrain.entity and terrain.entity.effect) or terrain.entity or terrain.item or terrain
 end
 
