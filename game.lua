@@ -186,7 +186,10 @@ function Game:astar(sx, sy, dx, dy)
     local neighbors = table.select(self:neighboring_coordinates(candidate.x, candidate.y), function (coordinate)
       -- only keep those which are passable and not already visited
       local terrain = self.sector.data.map[coordinate.x][coordinate.y]
-      return(self:terrain_is_passable(terrain) and not visited_map[coordinate.x][coordinate.y])
+      return(
+        self:terrain_is_passable(terrain) and 
+        not visited_map[coordinate.x][coordinate.y] and 
+        not (terrain.entity and not(dx == coordinate.x and dy == coordinate.y)))
     end)
 
     -- put them in the stack in priority of closest to the destination
