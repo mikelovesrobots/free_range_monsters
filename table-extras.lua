@@ -104,6 +104,12 @@ table.random = function(source)
   return source[math.random(1, #source)]
 end
 
+table.times = function(limit, func)
+  for i = 1, limit do
+    func(i)
+  end
+end
+
 table.reverse = function(source)
   local result = {}
   for i,v in ipairs(source) do table.unshift(result, v) end
