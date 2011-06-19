@@ -489,17 +489,7 @@ function Game:move_entity(entity, x_offset, y_offset)
   if self:terrain_is_passable(map[x][y]) then
     local enemy = map[x][y].entity
     if enemy then
-      if self:accuracy_check(entity, enemy) then
-        if table.present(entity.items) then
-          self:flavor_message(entity.items[1].flavor_text_on_hit, {entity_name=entity.name, enemy_name=enemy.name})
-          self:damage_entity(enemy, entity.items[1].base_damage)
-        else
-          self:flavor_message("unarmed_hit", {entity_name=entity.name, enemy_name=enemy.name})
-          self:damage_entity(enemy, 1)
-        end
-      else
-        self:flavor_message("unarmed_miss", {entity_name=entity.name, enemy_name=enemy.name})
-      end
+      self:attack(entity, enemy)
     else
       map[entity.x][entity.y].entity = nil
       
@@ -514,6 +504,33 @@ function Game:move_entity(entity, x_offset, y_offset)
     end
   else
     debug("goddamn, this terrain isn't passable")
+  end
+end
+
+function Game:attack(entity, enemy)
+  if self:accuracy_check(entity, enemy) then
+    local weapon = self:primary_weapon(entity)
+    if weapon then
+      self:flavor_message(weapon.flavor_text_on_hit, {entity_name=entity.name, enemy_name=enemy.name})
+      self:damage_entity(enemy, weapon.base_damage)
+    else
+      self:flavor_message("unarmed_hit", {entity_name=entity.name, enemy_name=enemy.name})
+      self:damage_entity(enemy, 1)
+    end
+  else
+    if weapon then
+      self:flavor_message(weapon.flavor_text_on_miss, {entity_name=entity.name, enemy_name=enemy.name})
+    else
+      self:flavor_message("unarmed_miss", {entity_name=entity.name, enemy_name=enemy.name})
+    end
+  end
+end
+
+function Game:primary_weapon(entity)
+  if table.present(entity.items) then
+    return entity.items[1]
+  else
+    return nil
   end
 end
 

@@ -26,5 +26,15 @@
     "{entity_name} smashes {enemy_name}"
     "{entity_name} slams {enemy_name}",
     "{entity_name} crushes {enemy_name}"
+  ],
+  "burst_hit": [
+    "{entity_name} blasts {enemy_name}",
+    "{entity_name} shoots {enemy_name}"
+  ],
+  "weapon_miss": [
+    "{entity_name} misses {enemy_name}",
+  ],
+  "out_of_ammo": [
+    "{entity_name} needs more ammo"
   ]
 }
