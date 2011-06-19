@@ -36,5 +36,12 @@
   ],
   "out_of_ammo": [
     "{entity_name} needs more ammo"
+  ],
+  "salvage_fail": [
+     "I can't really make anything out of {item_name}"
+  ],
+  "salvage_success": [
+     "Disassembled {item_name} into a {new_item_name}"
   ]
+
 }

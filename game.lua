@@ -576,6 +576,10 @@ function Game:pickup_item(entity)
   end
 end
 
+function Game:destroy_item(entity, item)
+  entity.items = table.without(entity.items, item)
+end
+
 function Game:accuracy_check(entity, enemy)
   return math.random(1,100) > 100 - 70
 end

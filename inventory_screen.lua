@@ -10,7 +10,7 @@ function InventoryScreen:enterState()
     default = "(d)rop, (r)eorder, (s)alvage, (c)onstruct",
     drop = "Select the items to drop then hit enter to finish",
     reorder = "Select a second item to swap with",
-    salvage = "Select the item to disassemble (salvage) then hit enter to finish",
+    salvage = "Select the item to disassemble (salvage)",
     reorder = "Select the items to construct then enter to finish",
   }
   self.selected_items = {}
@@ -48,6 +48,8 @@ function InventoryScreen:keypressed(key, unicode)
     self:keypressed_drop(key, unicode)
   elseif self.mode == "reorder" then
     self:keypressed_reorder(key, unicode)
+  elseif self.mode == "salvage" then
+    self:keypressed_salvage(key, unicode)
   else
     error("unsupported keypress mode")
   end
@@ -61,7 +63,7 @@ function InventoryScreen:keypressed_default(key, unicode)
   elseif (key == "r") then
     self.mode = "reorder"
   elseif (key == "s") then
-    -- salvage
+    self.mode = "salvage"
   elseif (key == "c") then
     -- construct
   end
@@ -110,5 +112,31 @@ function InventoryScreen:keypressed_reorder(key, unicode)
   else
     debug("unknown key: " .. key)
   end
+end
 
+function InventoryScreen:keypressed_salvage(key, unicode)
+  if (key == "escape") then
+    self.mode = "default"
+  elseif (string.len(key) == 1 and string.match(key, "%a")) then
+    local i = string.find(InventoryScreen.LETTERS, string.lower(key))
+    local item = self.player.items[i]
+    if item then
+      if table.present(item.salvages_into) then
+        table.each(item.salvages_into, function(new_item_def)
+          local new_item = create_item(new_item_def)
+          self:place_item(new_item, self.player.x, self.player.y)
+          self:flavor_message("salvage_success", {item_name=item.name, new_item_name=new_item.name})
+        end)
+
+        self.player.items = table.without(self.player.items, item)
+      else
+        self:flavor_message("salvage_fail", {item_name=item.name})
+      end
+
+      self.mode = "default"
+      screen_manager:popState()
+    end
+  else
+    debug("unknown key: " .. key)
+  end
 end

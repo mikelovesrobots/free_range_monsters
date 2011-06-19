@@ -16,6 +16,12 @@ table.detect = function(list, func)
   return(nil)
 end
 
+table.without = function(list, item)
+  return table.reject(list, function (x) 
+    return x == item 
+  end)
+end
+
 table.each = function(list, func)
   for i,v in ipairs(list) do
     func(v, i)
