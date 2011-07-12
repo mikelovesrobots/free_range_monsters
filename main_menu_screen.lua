@@ -4,7 +4,6 @@ MainMenuScreen.CHANGE_RATE = 1
 
 function MainMenuScreen:enterState() 
   self._titleFont = love.graphics.newFont("fonts/VeraMono.ttf", 18)
-  self._menuFont = love.graphics.newFont("fonts/VeraMono.ttf", 15)
 
   debug("MainMenuScreen initialized")
 
@@ -24,7 +23,7 @@ function MainMenuScreen:draw()
   love.graphics.setColor(self.current_color[1], self.current_color[2], self.current_color[3]);
   love.graphics.printf(app.config.TITLE, 0, 200, 800, 'center')
   
-  love.graphics.setFont(self._menuFont);
+  love.graphics.setFont(app.config.MENU_FONT);
   love.graphics.setColor(200,200,200)
   for i,v in ipairs(self.menu) do 
     local text = v.label

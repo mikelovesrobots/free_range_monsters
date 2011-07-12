@@ -62,11 +62,12 @@ end
 
 function Game:start_new_game()
   self:generate_sector()
-  table.times(3, function() self:level_up() end)
+  self:level_up()
 end
 
 function Game:level_up()
   self.sector.player.level = self.sector.player.level + 1
+  screen_manager:pushState("LevelUpScreen")
 end
 
 function Game:flavor_message(name, vars)
@@ -539,7 +540,6 @@ function Game:damage_entity(entity, points)
       screen_manager:popState()
       screen_manager:pushState("DeadScreen")
 
-
       -- throw the mother of all exceptions
       error("player has died")
     else
@@ -624,6 +624,16 @@ function create_entity(type, x, y)
   local base = {x=x, y=y, level=0}
   local template = entities_db:create(type)
   return table.merge(base, template)
+end
+
+function create_monster_part(type)
+  local base = {}
+  local template = monster_parts_db:create(type)
+  return table.merge(base, template)
+end
+
+function Game:available_monster_parts(entity)
+  return table.keys(monster_parts_db.db)
 end
 
 function terrain_top_character(terrain)

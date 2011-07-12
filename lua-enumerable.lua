@@ -63,14 +63,6 @@ table.partition = function(list, func)
   return matches, rejects
 end
 
-table.inject = function(list, value, func)
-  local result = value
-  for i,x in ipairs(list) do
-    result = result + func(x)
-  end
-  return(result)
-end
-
 table.merge = function(source, destination)
   for k,v in pairs(destination) do source[k] = v end
   return source
@@ -125,5 +117,24 @@ end
 table.dup = function(source)
   local result = {}
   for k,v in pairs(source) do result[k] = v end
+  return result
+end
+
+-- fisher-yates shuffle
+function table.shuffle(t)
+  local n = #t
+  while n > 2 do
+    local k = math.random(n)
+    t[n], t[k] = t[k], t[n]
+    n = n - 1
+  end
+  return t
+end
+
+table.keys = function(source)
+  local result = {}
+  for k,v in pairs(source) do
+    table.push(result, k)
+  end
   return result
 end

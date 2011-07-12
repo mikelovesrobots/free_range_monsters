@@ -1,6 +1,6 @@
 require('middleclass')
 require('middleclass-extras')
-require('table-extras')
+require('lua-enumerable')
 json = require('json/dkjson')
 
 require('config')
@@ -12,6 +12,7 @@ require('main_menu_screen')
 require('morgue_screen')
 require('about_screen')
 require('dead_screen')
+require('level_up_screen')
 require('game')
 
 DEBUG = true
@@ -21,6 +22,7 @@ function love.load()
   
   terrain_db = Library:new('terrain')
   entities_db = Library:new('entities')
+  monster_parts_db = Library:new('monster_parts')
   flavor_text_db = FlavorText:new('flavor_text')
 
   screen_manager = ScreenManager:new() -- this will call initialize and will set the initial menu
