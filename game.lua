@@ -54,11 +54,6 @@ function Game:keypressed(key, unicode)
     elseif (key == "n") then
       self:move_entity(self.sector.player, 1, 1)
       ends_turn()
-    elseif (key == ",") then
-      self:pickup_item(self.sector.player)
-    elseif (key == "i") then
-      screen_manager:pushState("InventoryScreen")
-      screen_manager.player = self.sector.player
     else
       debug("unmapped key:" .. key)
     end
@@ -67,9 +62,11 @@ end
 
 function Game:start_new_game()
   self:generate_sector()
-  self:message("You wake to a nightmare.")
-  self:message("Friends, family slaughtered.")
-  self:message("All is in flames.")
+  table.times(3, function() self:level_up() end)
+end
+
+function Game:level_up()
+  self.sector.player.level = self.sector.player.level + 1
 end
 
 function Game:flavor_message(name, vars)
@@ -258,7 +255,7 @@ function Game:nearest_walkable_empty_coordinate(x,y)
     candidates_examined = candidates_examined + 1
     local candidate = table.pop(candidates)
     local terrain = self.sector.data.map[candidate.x][candidate.y]
-    if (self:terrain_is_passable(terrain) and not terrain.item) then
+    if (self:terrain_is_passable(terrain)) then
       return candidate
     else
       for i,neighboring_coord in ipairs(self:neighboring_coordinates(candidate.x, candidate.y)) do
@@ -354,9 +351,6 @@ function Game:generate_sector()
   local monster4 = create_entity("bruiser", 58, 5)
   local monster5 = create_entity("bruiser", 56, 10)
   local player = create_entity("player", 10, 10)
-  local item1 = create_item("board_with_nail")
-  local item2 = create_item("board")
-  local item3 = create_item("nails")
 
   self.sector = {
     player=player,
@@ -370,10 +364,6 @@ function Game:generate_sector()
       map=generate_map()
     }
   }
-
-  self.sector.data.map[20][20].item = item1
-  self.sector.data.map[19][19].item = item2
-  self.sector.data.map[21][21].item = item3
 
   for i, v in ipairs(self.sector.entities) do
     self:move_entity(v, 0, 0)
@@ -439,14 +429,11 @@ function Game:draw_stats()
   local stats = {
     text_indicator("Health", self.sector.player.health, self.sector.player.max_health),
     text_indicator("  Food", 10, 20),
-    text_indicator("  Rads", 0, 20),
+    text_indicator("    XP", 0, 20),
   }
 
-  if table.present(self.sector.player.items) then
-     table.push(stats, "(a) " .. self.sector.player.items[1].name) 
-  end
-
   table.push(stats, "Current Time: " .. self.sector.data.current_time)
+  table.push(stats, "       Level: " .. self.sector.player.level)
 
   for i,text in ipairs(stats) do
     love.graphics.print(text, app.config.STATS_MARGIN_LEFT, app.config.STATS_MARGIN_TOP + (20 * (i - 1)))
@@ -509,75 +496,15 @@ end
 
 function Game:attack(entity, enemy)
   if self:accuracy_check(entity, enemy) then
-    local weapon = self:primary_weapon(entity)
-    if weapon then
-      self:flavor_message(weapon.flavor_text_on_hit, {entity_name=entity.name, enemy_name=enemy.name})
-      self:damage_entity(enemy, weapon.base_damage)
-    else
-      self:flavor_message("unarmed_hit", {entity_name=entity.name, enemy_name=enemy.name})
-      self:damage_entity(enemy, 1)
-    end
+    self:flavor_message("unarmed_hit", {entity_name=entity.name, enemy_name=enemy.name})
+    self:damage_entity(enemy, 1)
   else
-    if weapon then
-      self:flavor_message(weapon.flavor_text_on_miss, {entity_name=entity.name, enemy_name=enemy.name})
-    else
-      self:flavor_message("unarmed_miss", {entity_name=entity.name, enemy_name=enemy.name})
-    end
+    self:flavor_message("unarmed_miss", {entity_name=entity.name, enemy_name=enemy.name})
   end
-end
-
-function Game:primary_weapon(entity)
-  if table.present(entity.items) then
-    return entity.items[1]
-  else
-    return nil
-  end
-end
-
-function Game:drop_item(entity, item)
-  self:remove_item_from_entity(entity, item)
-  self:place_item(item, entity.x, entity.y)
 end
 
 function Game:remove_item_from_entity(entity, item)
   entity.items = table.reject(entity.items, function (inventory_item) return inventory_item == item end)
-end
-
-function Game:place_item(item, x, y)
-  if self.sector.data.map[x][y].item then
-    -- there's already something there.  Gotta drop it nearby
-    local coordinate = self:nearest_walkable_empty_coordinate(x,y)
-    if coordinate then
-      debug("space is full")
-      self.sector.data.map[coordinate.x][coordinate.y].item = item
-    else
-      -- item is lost, there's nowhere to fucking put it
-      debug("nowhere to fucking drop it")
-    end
-  else
-    debug("dropping it here")
-    self.sector.data.map[x][y].item = item
-  end
-end
-
-function Game:pickup_item(entity)
-  local terrain = self.sector.data.map[entity.x][entity.y]
-  if terrain.item then
-    local item_in_inventory = table.detect(entity.items, function (x) return x.name == terrain.item.name end)
-    if item_in_inventory then
-      item_in_inventory.quantity = item_in_inventory.quantity + 1
-      self:flavor_message("added_to_stack", {item_name=terrain.item.name})
-    else
-      table.push(entity.items, terrain.item)
-      self:flavor_message("added_to_inventory", {item_name=terrain.item.name})
-    end
-
-    terrain.item = nil
-  end
-end
-
-function Game:destroy_item(entity, item)
-  entity.items = table.without(entity.items, item)
 end
 
 function Game:accuracy_check(entity, enemy)
@@ -691,29 +618,11 @@ end
 function create_terrain(type)
   local template = terrain_db:create(type)
   return table.dup(template)
- -- {
- --   name=template.name,
- --   character=template.character,
- --   forecolor=template.forecolor,
- --   passable=template.passable
- -- }
 end
 
 function create_entity(type, x, y)
-  local base = {x=x, y=y, items={}}
+  local base = {x=x, y=y, level=0}
   local template = entities_db:create(type)
-  return table.merge(base, template)
-end
-
-function create_item(type)
-  local base = {
-    affinity = 0, 
-    quantity = 0, 
-    required_skills = {}, 
-    bonus_skills = {}, 
-    quality_score = math.random(-2, 2)
-  }
-  local template = items_db:create(type)
   return table.merge(base, template)
 end
 
@@ -726,6 +635,6 @@ function terrain_top_forecolor(terrain)
 end
 
 function terrain_top_entity(terrain)
-  return (terrain.entity and terrain.entity.effect) or terrain.entity or terrain.item or terrain
+  return (terrain.entity and terrain.entity.effect) or terrain.entity or terrain
 end
 
