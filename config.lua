@@ -1,5 +1,6 @@
 app = {}
 app.config = {
+  TITLE = "Free Range Monsters",
   CELL_WIDTH = 10,
   CELL_HEIGHT = 15,
   MAP_MARGIN_TOP = 10,

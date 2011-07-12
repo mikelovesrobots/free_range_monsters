@@ -22,7 +22,7 @@ end
 function MainMenuScreen:draw()
   love.graphics.setFont(self._titleFont);
   love.graphics.setColor(self.current_color[1], self.current_color[2], self.current_color[3]);
-  love.graphics.printf("Dead Hand and the Search For the Last Doomsday Device", 0, 200, 800, 'center')
+  love.graphics.printf(app.config.TITLE, 0, 200, 800, 'center')
   
   love.graphics.setFont(self._menuFont);
   love.graphics.setColor(200,200,200)
@@ -74,8 +74,8 @@ function MainMenuScreen:reset_menu()
   debug("resetting the menu")
 
   self.menu = {
-    {label="Start New Game", f=self.start_new_game_selected},
-    {label="Dead Characters", f=self.morgue_selected}, 
+    {label="Create New Monster", f=self.start_new_game_selected},
+    {label="Dead Creatures", f=self.morgue_selected}, 
     {label="About", f=self.about_selected}, 
     {label="Quit", f=self.quit_selected}
   }
