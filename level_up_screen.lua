@@ -73,8 +73,15 @@ function LevelUpScreen:reset_menu()
 
   self.title = self.base_part.name
 
-  self.menu = table.dup(self.base_part.contains)
-  table.each(self.base_part.unlocks, function (name)                               
+  self.menu = {}
+
+  table.each(self.base_part.contains, function (part)
+                                        if table.length(part.unlocks) then
+                                          table.push(self.menu, part)
+                                        end
+                                      end)
+
+  table.each(self.base_part.unlocks, function (name)
                                        local installed_names = table.collect(self.base_part.contains, function(x) return x.name end)       
                                        if not table.includes(installed_names, name) then
                                          table.push(self.menu, create_monster_part(name)) 
