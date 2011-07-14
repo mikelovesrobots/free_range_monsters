@@ -3,12 +3,14 @@ local LevelUpScreen = ScreenManager:addState('LevelUpScreen')
 
 function LevelUpScreen:enterState() 
   debug("LevelUpScreen initialized")
-  self:reset_menu()
+  self.parent_parts = {}
+  self:reset_menu(self.sector.player.base_part)
 end
 
-function LevelUpScreen:continuedState()
-  self:reset_menu()
-end
+--function LevelUpScreen:continuedState()
+--  self.parent_part = {}
+--  self:reset_menu(self.sector.player.base_part)
+--end
 
 function LevelUpScreen:draw()
   love.graphics.setFont(app.config.MENU_FONT)
@@ -61,22 +63,27 @@ function LevelUpScreen:keypressed(key, unicode)
     local item = self.menu[self.menu_index]
     self:selected_item(item)
   end
+
+  if (key == "escape" and table.present(self.parent_parts)) then
+    local part = table.pop(self.parent_parts)
+    self:reset_menu(part)
+  end
 end
 
 function LevelUpScreen:update(dt)
 end
 
-function LevelUpScreen:reset_menu()
+function LevelUpScreen:reset_menu(base_part)
   debug("resetting the menu")
 
-  self.base_part = self.sector.player.body
+  self.base_part = base_part
 
   self.title = self.base_part.name
 
   self.menu = {}
 
   table.each(self.base_part.contains, function (part)
-                                        if table.length(part.unlocks) then
+                                        if table.present(part.unlocks) then
                                           table.push(self.menu, part)
                                         end
                                       end)
@@ -92,6 +99,13 @@ function LevelUpScreen:reset_menu()
 end
 
 function LevelUpScreen:selected_item(part)
-  table.push(self.base_part.contains, part)
-  screen_manager:popState()
+  if table.includes(self.base_part.contains, part) then
+    table.push(self.parent_parts, self.base_part)
+    self:reset_menu(part)
+  else
+    debug("installing part")
+
+    table.push(self.base_part.contains, part)
+    screen_manager:popState()
+  end
 end

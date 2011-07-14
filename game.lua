@@ -617,7 +617,7 @@ function create_terrain(type)
 end
 
 function create_entity(type, x, y)
-  local base = {x=x, y=y, level=0, body=create_monster_part("torso")}
+  local base = {x=x, y=y, level=0, base_part=create_monster_part("torso")}
   local template = entities_db:create(type)
   return table.merge(base, template)
 end
