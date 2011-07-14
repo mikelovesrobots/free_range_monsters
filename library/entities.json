@@ -1,19 +1,19 @@
 {
   "raider": {
-    "name" : "raider",
-    "character" : "@",
-    "forecolor" : [ 246, 235, 187 ],
-    "allegiance" : "The Skulls",
+    "name" : "railors",
+    "character" : "r",
+    "forecolor" : [ 235,10,68 ],
+    "allegiance" : "railors",
     "max_health" : 10,
     "health" : 10,
     "ai" : "hostile"
   },
   
   "bruiser": {
-    "name" : "bruiser",
-    "character" : "@",
-    "forecolor" : [ 118, 113, 90 ],
-    "allegiance" : "Hellions",
+    "name" : "bauntisaurs",
+    "character" : "b",
+    "forecolor" : [ 242,100,61 ],
+    "allegiance" : "bauntisaurs",
     "max_health" : 10,
     "health" : 10,
     "ai" : "hostile"
@@ -22,7 +22,7 @@
   "player": {
     "name" : "player",
     "character" : "@",
-    "forecolor" : [ 120, 203, 255],
+    "forecolor" : [ 242,167,61 ],
     "allegiance" : "Players",
     "max_health" : 20,
     "health" : 15,

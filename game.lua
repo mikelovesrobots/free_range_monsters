@@ -25,6 +25,10 @@ function Game:keypressed(key, unicode)
     screen_manager:popState()
   elseif (self.sector.data.player_turn) then
     local ends_turn = function ()
+      if (math.random(1,5) == 1) then
+        self:gain_health(self.sector.player, 1)
+      end
+
       self:schedule_event(self.sector.player, "AI", 100)
       self.sector.data.player_turn = false
     end
@@ -416,7 +420,7 @@ function Game:draw_status_messages()
   
   local text = ''
 
-  local start_index = clip(#self.status_messages - 10, 1, #self.status_messages)
+  local start_index = clip(#self.status_messages - 8, 1, #self.status_messages)
   for index = start_index, #self.status_messages do
     text = text .. self.status_messages[index] .. "\n"
   end
@@ -504,6 +508,14 @@ function Game:attack(entity, enemy)
   end
 end
 
+function Game:gain_health(entity, health)
+  if entity.health + health > entity.max_health then
+    entity.health = entity.max_health
+  else
+    entity.health = entity.health + health
+  end
+end
+
 function Game:remove_item_from_entity(entity, item)
   entity.items = table.reject(entity.items, function (inventory_item) return inventory_item == item end)
 end
@@ -573,30 +585,12 @@ function generate_map()
   for x = 1, app.config.MAP_NUM_CELLS_X do
     local row = {}
     for y = 1, app.config.MAP_NUM_CELLS_Y do
-      if x == 20 or x == 21 or x == 23 or x == 24 then
-        table.insert(row, create_terrain("road"))
-      elseif x == 22 then
-        if y % 2 == 1 and math.random(1,4) <= 3 then
-          table.insert(row, create_terrain("lane_marker"))
-        else 
-          table.insert(row, create_terrain("road"))
-        end
-      elseif (x == 19 or x == 25) and math.random(1,4) <= 3 then
-        table.insert(row, create_terrain("road"))
-      elseif (x == 18 or x == 26) then
-        if math.random(1,5) == 1 then
-          table.insert(row, create_terrain("rubble"))
-        else
-          table.insert(row, create_terrain("rock"))
-        end
+      if math.random(1,10) == 1 then
+        table.insert(row, create_terrain("rubble"))
+      elseif math.random(1,30) == 1 then
+        table.insert(row, create_terrain("rock"))
       else
-        if math.random(1,10) == 1 then
-          table.insert(row, create_terrain("rubble"))
-        elseif math.random(1,30) == 1 then
-          table.insert(row, create_terrain("rock"))
-        else
-          table.insert(row, create_terrain("dirt"))
-        end
+        table.insert(row, create_terrain("dirt"))
       end
     end
     table.insert(maps, row)

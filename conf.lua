@@ -1,5 +1,5 @@
 function love.conf(t)
-    t.title = "Dead Hand"       -- The title of the window the game is in (string)
+    t.title = "Free Range Monsters"       -- The title of the window the game is in (string)
     t.author = "Mike Judge"     -- The author of the game (string)
     t.identity = nil            -- The name of the save directory (string)
     t.version = 0               -- The LÖVE version this game was made for (number)
