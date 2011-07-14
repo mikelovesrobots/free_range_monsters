@@ -8,8 +8,9 @@ function DeadScreen:enterState()
 end
 
 function DeadScreen:draw()
+  love.graphics.setColor(235,10,68)
+  love.graphics.printf("Your race ends with you.", 0, 200, 800, 'center')
   love.graphics.setColor(255,255,255);
-  love.graphics.printf("You are dead", 0, 200, 800, 'center')
   love.graphics.printf("Press enter to return to the previous screen", 0, 400, 800, 'center')
 end
 
