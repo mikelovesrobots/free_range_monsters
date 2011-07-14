@@ -12,6 +12,19 @@
     "speed" : 1,
     "mind" : 1,
     "health" : 10,
-    "unlocks" : [ "appendage" ]
+    "unlocks" : [ "appendage", "spines" ]
+  },
+
+  "spines" : {
+    "name" : "spines",
+    "armor" : 1,
+    "muscle" : 1,
+    "unlocks" : [ "spikes" ]
+  },
+
+  "spikes" : {
+    "name" : "spikes",
+    "armor" : 2,
+    "muscle" : 2
   }
 }

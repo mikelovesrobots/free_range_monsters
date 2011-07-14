@@ -23,7 +23,7 @@ function LevelUpScreen:draw()
       text = "[ " .. text .. " ]"
     end
 
-    love.graphics.printf(text, 0, 150 + (25 * i), 800, 'center')
+    love.graphics.printf(text, 50, 150 + (25 * i), 750, 'left')
   end
 end
 
@@ -53,7 +53,12 @@ end
 
 function LevelUpScreen:reset_menu()
   debug("resetting the menu")
-  self.menu = self:available_monster_parts(self.sector.player)
+  self.menu = {self.sector.player.body.name}
+  table.each(self.sector.player.body.unlocks, function (x) 
+                                                 local part = create_monster_part(x)
+                                                 print(part.name)
+                                                 table.push(self.menu, "  " .. part.name)
+                                              end)
   self.menu_index = 1
 end
 

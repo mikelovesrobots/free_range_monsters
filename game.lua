@@ -621,19 +621,15 @@ function create_terrain(type)
 end
 
 function create_entity(type, x, y)
-  local base = {x=x, y=y, level=0}
+  local base = {x=x, y=y, level=0, body=create_monster_part("torso")}
   local template = entities_db:create(type)
   return table.merge(base, template)
 end
 
 function create_monster_part(type)
-  local base = {}
+  local base = {armor=0,muscle=0,speed=0,mind=0,health=0,unlocks={}}
   local template = monster_parts_db:create(type)
   return table.merge(base, template)
-end
-
-function Game:available_monster_parts(entity)
-  return table.keys(monster_parts_db.db)
 end
 
 function terrain_top_character(terrain)
