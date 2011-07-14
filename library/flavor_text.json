@@ -1,12 +1,11 @@
 {
   "unarmed_hit": [
     "{entity_name} hits {enemy_name}",
-    "{entity_name} backhands {enemy_name}",
     "{entity_name} kicks {enemy_name}",
-    "{entity_name} uppercuts {enemy_name}",
-    "{entity_name} strikes {enemy_name}",
-    "{entity_name} punches {enemy_name}",
-    "{entity_name} elbows {enemy_name}"
+    "{entity_name} bites {enemy_name}",
+    "{entity_name} chomps {enemy_name}",
+    "{entity_name} rushes {enemy_name}",
+    "{entity_name} stomps {enemy_name}"
   ],
   "unarmed_miss": [
     "{entity_name} misses {enemy_name}",
