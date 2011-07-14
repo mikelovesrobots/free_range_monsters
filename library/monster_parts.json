@@ -1,8 +1,39 @@
 {
-  "appendage" : {
-    "name" : "appendage",
+  "arms" : {
+    "name" : "arms",
+    "muscle" : 4,
+    "health" : 4,
+    "speed" : 2,
+    "unlocks" : [ "spines" ]
+  },
+
+  "legs" : {
+    "name" : "legs",
+    "muscle" : 2,
+    "health" : 4,
+    "speed" : 5,
+    "unlocks" : [ "spines" ]
+  },
+
+  "tail" : {
+    "name" : "tail",
+    "muscle" : 2,
+    "health" : 2,
+    "speed" : 2,
+    "unlocks" : [ "spines" ]
+  },
+
+  "head" : {
+    "name" : "head",
     "muscle" : 1,
-    "health" : 3,
+    "health" : 4,
+    "mind" : 5,
+    "unlocks" : [ "spines", "beak" ]
+  },
+
+  "beak" : {
+    "name" : "beak",
+    "muscle" : 2
   },
 
   "torso" : {
@@ -12,7 +43,7 @@
     "speed" : 1,
     "mind" : 1,
     "health" : 10,
-    "unlocks" : [ "appendage", "spines" ]
+    "unlocks" : [ "arms", "legs", "tail", "spines" ]
   },
 
   "spines" : {
