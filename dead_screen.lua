@@ -8,7 +8,7 @@ function DeadScreen:enterState()
 end
 
 function DeadScreen:draw()
-  love.graphics.setColor(235,10,68)
+  love.graphics.setColor(app.config.MENU_TITLE_COLOR[1], app.config.MENU_TITLE_COLOR[2], app.config.MENU_TITLE_COLOR[3])
   love.graphics.printf("Your race ends with you.", 0, 200, 800, 'center')
   love.graphics.setColor(255,255,255);
   love.graphics.printf("Press enter to return to the previous screen", 0, 400, 800, 'center')

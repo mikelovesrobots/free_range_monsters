@@ -34,16 +34,16 @@ function Game:keypressed(key, unicode)
     end
     if (key == "s") then
       ends_turn()
-    elseif (key == "h") then
+    elseif (key == "h" or key == "left") then
       self:move_entity(self.sector.player, -1, 0)
       ends_turn()
-    elseif (key == "j") then
+    elseif (key == "j" or key == "down") then
       self:move_entity(self.sector.player, 0, 1)
       ends_turn()
-    elseif (key == "k") then
+    elseif (key == "k" or key == "up") then
       self:move_entity(self.sector.player, 0, -1)
       ends_turn()
-    elseif (key == "l") then
+    elseif (key == "l" or key == "right") then
       self:move_entity(self.sector.player, 1, 0)
       ends_turn()
     elseif (key == "y") then
@@ -58,6 +58,8 @@ function Game:keypressed(key, unicode)
     elseif (key == "n") then
       self:move_entity(self.sector.player, 1, 1)
       ends_turn()
+    elseif (key == "x") then
+      self:level_up()
     else
       debug("unmapped key:" .. key)
     end
@@ -621,7 +623,7 @@ function create_entity(type, x, y)
 end
 
 function create_monster_part(type)
-  local base = {armor=0,muscle=0,speed=0,mind=0,health=0,unlocks={}}
+  local base = {armor=0,muscle=0,speed=0,mind=0,health=0,unlocks={},contains={}}
   local template = monster_parts_db:create(type)
   return table.merge(base, template)
 end

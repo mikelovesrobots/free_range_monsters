@@ -11,20 +11,35 @@ function LevelUpScreen:continuedState()
 end
 
 function LevelUpScreen:draw()
-  local menu_color = app.config.MENU_REGULAR_COLOR
-  love.graphics.setColor(menu_color[1], menu_color[2], menu_color[3])
   love.graphics.setFont(app.config.MENU_FONT)
 
-  love.graphics.printf("Evolve!", 0, 50, 800, 'center')
+  self:set_color(app.config.MENU_TITLE_COLOR)
+  love.graphics.printf("Your race of monsters evolves!", 0, 25, 800, 'center')
+
+  self:set_color(app.config.MENU_REGULAR_COLOR)
+  love.graphics.printf("Choose an upgrade", 0, 50, 800, 'center')
   
-  for i,v in ipairs(self.menu) do 
-    local text = v
-    if self.menu_index == i then
-      text = "[ " .. text .. " ]"
+  love.graphics.printf("(" .. self.base_part.name .. ")", 0, 75, 800, 'center')
+
+  for i,part in ipairs(self.menu) do 
+    local text = part.name
+
+    if table.includes(self.base_part.contains, part) then
+      text = text .. " >>>"
     end
 
-    love.graphics.printf(text, 50, 150 + (25 * i), 750, 'left')
+    if self.menu_index == i then
+      self:set_color(app.config.MENU_HIGHLIGHT_COLOR)
+    else
+      self:set_color(app.config.MENU_REGULAR_COLOR)
+    end
+
+    love.graphics.printf(text, 50, 100 + (25 * i), 750, 'left')
   end
+end
+
+function LevelUpScreen:set_color(color)
+  love.graphics.setColor(color[1], color[2], color[3])
 end
 
 function LevelUpScreen:keypressed(key, unicode)
@@ -53,15 +68,23 @@ end
 
 function LevelUpScreen:reset_menu()
   debug("resetting the menu")
-  self.menu = {self.sector.player.body.name}
-  table.each(self.sector.player.body.unlocks, function (x) 
-                                                 local part = create_monster_part(x)
-                                                 print(part.name)
-                                                 table.push(self.menu, "  " .. part.name)
-                                              end)
+
+  self.base_part = self.sector.player.body
+
+  self.title = self.base_part.name
+
+  self.menu = table.dup(self.base_part.contains)
+  table.each(self.base_part.unlocks, function (name)                               
+                                       local installed_names = table.collect(self.base_part.contains, function(x) return x.name end)       
+                                       if not table.includes(installed_names, name) then
+                                         table.push(self.menu, create_monster_part(name)) 
+                                       end
+                                     end)
+
   self.menu_index = 1
 end
 
-function LevelUpScreen:selected_item(item)
+function LevelUpScreen:selected_item(part)
+  table.push(self.base_part.contains, part)
   screen_manager:popState()
 end

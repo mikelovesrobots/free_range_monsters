@@ -12,7 +12,8 @@ app.config = {
   STREAM_WIDTH = 350,
   STREAM_MARGIN_TOP = 420,
   STREAM_MARGIN_LEFT = 25,
+  MENU_TITLE_COLOR = {235, 10, 68},
+  MENU_HIGHLIGHT_COLOR = {255, 179, 11},
   MENU_REGULAR_COLOR = {200, 200, 200},
-  MENU_HIGHLIGHTED_COLOR = {255, 179, 11},
   MENU_FONT = love.graphics.newFont("fonts/VeraMono.ttf", 15)
 }
