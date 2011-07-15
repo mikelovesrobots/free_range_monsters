@@ -13,8 +13,14 @@
   },
   "rubble" : { 
     "name" : "rubble",
-    "character" : "~",
+    "character" : ",",
     "forecolor" : [ 41,104,61 ],
     "passable" : true
+  },
+  "water" : {
+    "name" : "water",
+    "character" : "~",
+    "forecolor" : [ 48, 140, 130 ],
+    "passable" : false
   }
 }
