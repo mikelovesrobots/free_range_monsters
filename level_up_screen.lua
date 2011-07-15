@@ -23,6 +23,10 @@ function LevelUpScreen:draw()
   
   love.graphics.printf("(" .. self.base_part.name .. ")", 0, 75, 800, 'center')
 
+  if table.present(self.parent_parts) then
+    love.graphics.printf("( press esc to return to " .. self.parent_parts[1].name .. " )", 0, 550, 800, 'center')
+  end
+
   for i,part in ipairs(self.menu) do 
     local text = part.name
 

@@ -7,12 +7,42 @@
     "unlocks" : [ "spines" ]
   },
 
+  "beak" : {
+    "name" : "beak",
+    "muscle" : 2,
+    "health" : 2,
+    "speed" : 1,
+    "unlocks" : [ "serrated beak" ]
+  },
+
+  "canine teeth" : {
+    "name" : "canine teeth",
+    "armor" : 2,
+    "muscle" : 4,
+    "speed" : 1
+  },
+
+  "head" : {
+    "name" : "head",
+    "muscle" : 2,
+    "health" : 5,
+    "mind" : 4,
+    "unlocks" : [ "beak", "spines", "teeth" ]
+  },
+
   "legs" : {
     "name" : "legs",
     "muscle" : 2,
     "health" : 4,
     "speed" : 5,
     "unlocks" : [ "spines" ]
+  },
+
+  "serrated beak" : {
+    "name" : "serrated beak",
+    "muscle" : 4,
+    "health" : 3,
+    "speed" : 0
   },
 
   "tail" : {
@@ -22,18 +52,13 @@
     "speed" : 2,
     "unlocks" : [ "spines" ]
   },
-
-  "head" : {
-    "name" : "head",
+  
+  "teeth" : {
+    "name" : "teeth",
+    "armor" : 1,
     "muscle" : 1,
-    "health" : 4,
-    "mind" : 5,
-    "unlocks" : [ "spines", "beak" ]
-  },
-
-  "beak" : {
-    "name" : "beak",
-    "muscle" : 2
+    "speed" : 1,
+    "unlocks" : [ "canine teeth" ]
   },
 
   "torso" : {
@@ -43,7 +68,7 @@
     "speed" : 1,
     "mind" : 1,
     "health" : 10,
-    "unlocks" : [ "arms", "legs", "tail", "spines" ]
+    "unlocks" : [ "arms", "head", "legs", "spines", "tail" ]
   },
 
   "spines" : {

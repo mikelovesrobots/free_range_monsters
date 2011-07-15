@@ -74,6 +74,7 @@ end
 function Game:level_up()
   self.sector.player.level = self.sector.player.level + 1
   screen_manager:pushState("LevelUpScreen")
+  self:gain_health(self.sector.player, self.sector.player.max_health)
 end
 
 function Game:flavor_message(name, vars)
