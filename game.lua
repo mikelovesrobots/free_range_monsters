@@ -353,16 +353,17 @@ end
 
 function Game:generate_sector()
   -- add monsters, the player and the map
-  local monster1 = create_entity("raider", 50, 20)
-  local monster2 = create_entity("raider", 55, 10)
-  local monster3 = create_entity("bruiser", 56, 8)
-  local monster4 = create_entity("bruiser", 58, 5)
-  local monster5 = create_entity("bruiser", 56, 10)
-  local player = create_entity("player", 10, 10)
+  local monster1 = create_entity("raider")
+  local monster2 = create_entity("raider")
+  local monster3 = create_entity("bruiser")
+  local monster4 = create_entity("bruiser")
+  local monster5 = create_entity("bruiser")
+  local player = create_entity("player")
+  local entities = {player, monster1, monster2, monster3, monster4, monster5}
 
   self.sector = {
     player=player,
-    entities={player, monster1, monster2, monster3, monster4, monster5},
+    entities={},
     data={
       current_time=0,
       event_queue={},
@@ -372,12 +373,20 @@ function Game:generate_sector()
       map=generate_map()
     }
   }
-
-  for i, v in ipairs(self.sector.entities) do
-    self:move_entity(v, 0, 0)
-    self:schedule_event(v, "AI", 100)
-  end
   
+  table.each(entities, 
+             function(entity) 
+               self:place_entity(entity, math.random(1, app.config.MAP_NUM_CELLS_X), math.random(1, app.config.MAP_NUM_CELLS_Y)) 
+             end)
+end
+
+function Game:place_entity(entity, x, y)
+  entity.x = x
+  entity.y = y
+
+  table.push(self.sector.entities, entity)
+  self:move_entity(entity, 0, 0)
+  self:schedule_event(entity, "AI", 100)
 end
 
 function sector_filename(x, y)
@@ -583,8 +592,11 @@ end
 
 -- returns a random map
 function generate_map()
-  local maps = {}
+  return add_random_crypt(generate_biome())
+end
 
+function generate_biome()
+  local map = {}
   for x = 1, app.config.MAP_NUM_CELLS_X do
     local row = {}
     for y = 1, app.config.MAP_NUM_CELLS_Y do
@@ -596,10 +608,37 @@ function generate_map()
         table.insert(row, create_terrain("dirt"))
       end
     end
-    table.insert(maps, row)
+    table.insert(map, row)
   end
 
-  return(maps)
+  return map
+end
+
+function add_random_crypt(map)
+  local random_crypt_name = table.random(table.keys(crypts_db.db))
+  debug("adding " .. random_crypt_name .. " crypt")
+  local crypt = create_crypt(random_crypt_name)
+ 
+  local crypt_width = #crypt.map[1]
+  local crypt_height = #crypt.map
+
+  local map_width = app.config.MAP_NUM_CELLS_X
+  local map_height = app.config.MAP_NUM_CELLS_Y
+
+  local offset_x = math.random(1, map_width - crypt_width)
+  local offset_y = math.random(1, map_height - crypt_height)
+
+  for x = 1, crypt_width do
+    for y = 1, crypt_height do
+      local char = string.sub(crypt.map[y], x, x)
+      local definition = crypt.definitions[char]
+      if definition then
+        map[x + offset_x][y + offset_y] = create_terrain(crypt.definitions[char])
+      end
+    end
+  end
+
+  return map
 end
 
 function clip(i, min, max)
@@ -617,8 +656,8 @@ function create_terrain(type)
   return table.dup(template)
 end
 
-function create_entity(type, x, y)
-  local base = {x=x, y=y, level=0, base_part=create_monster_part("torso")}
+function create_entity(type)
+  local base = {x=0, y=0, level=0, base_part=create_monster_part("torso")}
   local template = entities_db:create(type)
   return table.merge(base, template)
 end
@@ -627,6 +666,10 @@ function create_monster_part(type)
   local base = {armor=0,muscle=0,speed=0,mind=0,health=0,unlocks={},contains={}}
   local template = monster_parts_db:create(type)
   return table.merge(base, template)
+end
+
+function create_crypt(type)
+  return crypts_db:create(type)
 end
 
 function terrain_top_character(terrain)

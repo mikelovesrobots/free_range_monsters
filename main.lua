@@ -23,6 +23,7 @@ function love.load()
   terrain_db = Library:new('terrain')
   entities_db = Library:new('entities')
   monster_parts_db = Library:new('monster_parts')
+  crypts_db = Library:new('crypts')
   flavor_text_db = FlavorText:new('flavor_text')
 
   screen_manager = ScreenManager:new() -- this will call initialize and will set the initial menu
