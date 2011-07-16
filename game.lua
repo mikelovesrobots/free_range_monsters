@@ -75,6 +75,8 @@ function Game:level_up()
   self.sector.player.level = self.sector.player.level + 1
   screen_manager:pushState("LevelUpScreen")
   self:gain_health(self.sector.player, self.sector.player.max_health)
+  self.sector.player.xp = 0
+  self.sector.player.max_xp = 10 * self.sector.player.level
 end
 
 function Game:flavor_message(name, vars)
@@ -358,8 +360,10 @@ function Game:generate_sector()
   local monster3 = create_entity("bruiser")
   local monster4 = create_entity("bruiser")
   local monster5 = create_entity("bruiser")
+  local monster6 = create_entity("bruiser")
+  local monster7 = create_entity("bruiser")
   local player = create_entity("player")
-  local entities = {player, monster1, monster2, monster3, monster4, monster5}
+  local entities = {player, monster1, monster2, monster3, monster4, monster5, monster6, monster7}
 
   self.sector = {
     player=player,
@@ -446,7 +450,7 @@ function Game:draw_stats()
   local stats = {
     text_indicator("Health", self.sector.player.health, self.sector.player.max_health),
     text_indicator("  Food", 10, 20),
-    text_indicator("    XP", 0, 20),
+    text_indicator("    XP", self.sector.player.xp, self.sector.player.max_xp),
   }
 
   table.push(stats, "Current Time: " .. self.sector.data.current_time)
@@ -514,7 +518,7 @@ end
 function Game:attack(entity, enemy)
   if self:accuracy_check(entity, enemy) then
     self:flavor_message("unarmed_hit", {entity_name=entity.name, enemy_name=enemy.name})
-    self:damage_entity(enemy, 1)
+    self:damage_entity(entity, enemy, 1)
   else
     self:flavor_message("unarmed_miss", {entity_name=entity.name, enemy_name=enemy.name})
   end
@@ -536,28 +540,28 @@ function Game:accuracy_check(entity, enemy)
   return math.random(1,100) > 100 - 70
 end
 
-function Game:damage_entity(entity, points)
-  entity.health = entity.health - points
+function Game:damage_entity(entity, enemy, points)
+  enemy.health = enemy.health - points
 
-  local pct = entity.health / entity.max_health
-  entity.effect = {character="*"}
+  local pct = enemy.health / enemy.max_health
+  enemy.effect = {character="*"}
   if pct <= 0.20 then
-    entity.effect.forecolor = {232, 87, 76}
+    enemy.effect.forecolor = {232, 87, 76}
   elseif pct > 0.20 and pct <= 0.40 then
-    entity.effect.forecolor = {242, 123, 41}
+    enemy.effect.forecolor = {242, 123, 41}
   elseif pct > 0.40 and pct <= 0.60 then
-    entity.effect.forecolor = {229, 165, 27}
+    enemy.effect.forecolor = {229, 165, 27}
   elseif pct > 0.60 and pct <= 0.80 then
-    entity.effect.forecolor = {217, 204, 60}
+    enemy.effect.forecolor = {217, 204, 60}
   elseif pct > 0.80 and pct <= 0.95 then
-    entity.effect.forecolor = {57, 153, 119}
+    enemy.effect.forecolor = {57, 153, 119}
   elseif pct > 0.95 then
-    entity.effect.forecolor = {255, 255, 255}
+    enemy.effect.forecolor = {255, 255, 255}
   end
-  self:add_effect(entity, 0.5)
+  self:add_effect(enemy, 0.5)
 
-  if self:is_entity_dead(entity) then
-    if self.sector.player == entity then
+  if self:is_entity_dead(enemy) then
+    if self.sector.player == enemy then
       debug("player died")
       self:destroy_saves()
 
@@ -568,9 +572,19 @@ function Game:damage_entity(entity, points)
       error("player has died")
     else
       debug("enemy died")
-      self:message(entity.name .. " was killed")
-      self:remove_entity(entity)
+      self:message(enemy.name .. " was killed")
+      self:remove_entity(enemy)
+      if (entity == self.sector.player) then
+        self:award_xp(enemy.level * 2)
+      end
     end
+  end
+end
+
+function Game:award_xp(xp)
+  self.sector.player.xp = self.sector.player.xp + xp
+  if self.sector.player.xp > self.sector.player.max_xp then
+    self:level_up()
   end
 end
 
@@ -657,7 +671,7 @@ function create_terrain(type)
 end
 
 function create_entity(type)
-  local base = {x=0, y=0, level=0, base_part=create_monster_part("torso")}
+  local base = {x=0, y=0, level=1, base_part=create_monster_part("torso")}
   local template = entities_db:create(type)
   return table.merge(base, template)
 end

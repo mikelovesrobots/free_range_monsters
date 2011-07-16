@@ -27,5 +27,8 @@
     "max_health" : 20,
     "health" : 15,
     "ai" : "player",
+    "level" : 0,
+    "xp" : 0,
+    "max_xp" : 20
   }
 }
