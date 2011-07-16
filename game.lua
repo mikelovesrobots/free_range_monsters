@@ -385,8 +385,9 @@ function Game:generate_sector()
 end
 
 function Game:place_entity(entity, x, y)
-  entity.x = x
-  entity.y = y
+  local coordinate = self:nearest_walkable_empty_coordinate(x,y)
+  entity.x = coordinate.x
+  entity.y = coordinate.y
 
   table.push(self.sector.entities, entity)
   self:move_entity(entity, 0, 0)
