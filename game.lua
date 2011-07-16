@@ -588,7 +588,7 @@ end
 
 function Game:award_xp(xp)
   self.sector.player.xp = self.sector.player.xp + xp
-  if self.sector.player.xp > self.sector.player.max_xp then
+  if self.sector.player.xp >= self.sector.player.max_xp then
     self:level_up()
   end
 end
