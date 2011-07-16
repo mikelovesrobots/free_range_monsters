@@ -13,6 +13,7 @@ require('morgue_screen')
 require('about_screen')
 require('dead_screen')
 require('level_up_screen')
+require('help_screen')
 require('game')
 
 DEBUG = true

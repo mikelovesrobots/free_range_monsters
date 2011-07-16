@@ -60,6 +60,8 @@ function Game:keypressed(key, unicode)
       ends_turn()
     elseif (key == "x") then
       self:level_up()
+    elseif (key == "/") then
+      screen_manager:pushState("HelpScreen")
     else
       debug("unmapped key:" .. key)
     end
@@ -73,7 +75,9 @@ end
 
 function Game:level_up()
   self.sector.player.level = self.sector.player.level + 1
+
   screen_manager:pushState("LevelUpScreen")
+
   self:gain_health(self.sector.player, self.sector.player.max_health)
   self.sector.player.xp = 0
   self.sector.player.max_xp = 10 * self.sector.player.level

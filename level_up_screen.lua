@@ -15,10 +15,10 @@ end
 function LevelUpScreen:draw()
   love.graphics.setFont(app.config.MENU_FONT)
 
-  self:set_color(app.config.MENU_TITLE_COLOR)
+  set_color(app.config.MENU_TITLE_COLOR)
   love.graphics.printf("Your race of monsters evolves!", 0, 25, 800, 'center')
 
-  self:set_color(app.config.MENU_REGULAR_COLOR)
+  set_color(app.config.MENU_REGULAR_COLOR)
   love.graphics.printf("Choose an upgrade", 0, 50, 800, 'center')
   
   love.graphics.printf("(" .. self.base_part.name .. ")", 0, 75, 800, 'center')
@@ -35,17 +35,13 @@ function LevelUpScreen:draw()
     end
 
     if self.menu_index == i then
-      self:set_color(app.config.MENU_HIGHLIGHT_COLOR)
+      set_color(app.config.MENU_HIGHLIGHT_COLOR)
     else
-      self:set_color(app.config.MENU_REGULAR_COLOR)
+      set_color(app.config.MENU_REGULAR_COLOR)
     end
 
     love.graphics.printf(text, 50, 100 + (25 * i), 750, 'left')
   end
-end
-
-function LevelUpScreen:set_color(color)
-  love.graphics.setColor(color[1], color[2], color[3])
 end
 
 function LevelUpScreen:keypressed(key, unicode)

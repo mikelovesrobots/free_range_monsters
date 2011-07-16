@@ -39,3 +39,7 @@ json.load_from_file = function(path)
     error("Couldn't properly parse json: " .. path)
   end
 end
+
+function set_color(rgb)
+  love.graphics.setColor(rgb[1], rgb[2], rgb[3])
+end
