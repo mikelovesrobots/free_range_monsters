@@ -422,8 +422,17 @@ function Game:draw_map()
   for x,row in ipairs(self.sector.data.map) do
     for y,terrain in ipairs(row) do
       local forecolor = terrain_top_forecolor(terrain)
-      love.graphics.setColor(forecolor[1], forecolor[2], forecolor[3])
-      love.graphics.print(terrain_top_character(terrain), self:map_to_pix_x(x), self:map_to_pix_y(y))
+
+
+      if (math.dist(x,y,self.sector.player.x,self.sector.player.y) < 10) then
+        terrain.seen = true
+        love.graphics.setColor(forecolor[1], forecolor[2], forecolor[3])
+        love.graphics.print(terrain_top_character(terrain), self:map_to_pix_x(x), self:map_to_pix_y(y))
+      elseif (terrain.seen) then
+        local monochrome = (forecolor[1] + forecolor[2] + forecolor[3]) / 3 - 20
+        love.graphics.setColor(monochrome, monochrome, monochrome)
+        love.graphics.print(terrain.character, self:map_to_pix_x(x), self:map_to_pix_y(y))
+      end
     end
   end
 end
@@ -671,8 +680,9 @@ function clip(i, min, max)
 end
 
 function create_terrain(type)
+  local base={seen=false}
   local template = terrain_db:create(type)
-  return table.dup(template)
+  return table.merge(base, template)
 end
 
 function create_entity(type)
