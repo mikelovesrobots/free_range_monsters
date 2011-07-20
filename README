@@ -1,8 +1,47 @@
-Free Range Monsters is a roguelike where you create a monster and guide its evolution, battling other monsters. 
+Free Range Monsters is a roguelike where you create a monster and guide its evolution while trying to stay alive.
+
+Current State
+-------------
+Early alpha, not really playable yet, more of a framework for creating a create your own monster game.
+
+Installation
+------------
 
 To run it from source, you'll need to install LÖVE:
 
     http://love2d.org/
 
-Then run the app.  Christ, I have no idea how to do that for people who haven't setup
-an alias to love.  I need to figure that out.
+Then run the app.  
+
+In OS X, I run it in development from the terminal:
+
+    alias love="/Applications/love.app/Contents/MacOS/love"
+    love .
+
+Windows and Linux run instructions: http://love2d.org/wiki/Getting_Started
+
+You can follow my development over at: http://mikelovesrobots.tumblr.com
+
+To do list
+----------
+* Player should level up 4 times when creating a new monster.  Tutorial levels are always boring.  Lets just jump into the action.
+* Make multiple sectors (maps) and a transport mechanism for moving the player from one sector to another when they walk off the screen
+* Make monster part attributes actually impact combat
+* Make monster parts for vision and have that actually impact the range of perception
+* Make the map use the bold vera font rather than the normal one, too hard to read
+* Add lots and lots more monster parts, like 100+ more
+* Add lots and lots more crypts
+* Figure out what to do with hunger
+* Make the crypt addition code occasionally flip the crypt vertically and horizontally
+
+Long term
+---------
+* Send the monster to the server on level up, and download other player's monsters
+* Add an ability screen for triggering special abilities (e.g., burrow, spit acid, chameleon skin, fly, etc.)
+* Biomes
+
+Things considered
+-----------------
+* Make leveling up a more dramatic affair, lay an egg and protect it from a wave of monsters, when it hatches you level up and continue playing as the new creature
+* Somehow unlock rare monster parts by defeating those monsters for the first time?
+
