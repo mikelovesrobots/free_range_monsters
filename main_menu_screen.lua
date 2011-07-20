@@ -80,7 +80,7 @@ function MainMenuScreen:reset_menu()
     {label="Quit", f=self.quit_selected}
   }
 
-  if file_exists(sector_filename(0,0)) then
+  if love.filesystem.exists(sector_filename(0,0)) then
     table.insert(self.menu, 1, {label="Continue Previous Game", f=self.continue_previous_game_selected})
   end
 

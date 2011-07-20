@@ -339,20 +339,21 @@ end
 
 function Game:destroy_saves()
   debug("removing saves... oh please don't delete anything important")
-  rmdir("saves")
+  love.filesystem.remove(sector_filename(0,0))
 end
 
 function Game:save_sector()
-  mkdir("saves")
-
-  local out = assert(io.open(sector_filename(self.sector.data.x, self.sector.data.y), "w"))
-  out:write(json.encode(self.sector.data))
-  io.close(out)
+  love.filesystem.mkdir("saves")
+  local path = sector_filename(self.sector.data.x, self.sector.data.y)
+  love.filesystem.write(path, json.encode(self.sector.data))
 end
 
 function Game:load_sector()
   self.sector = {}
-  self.sector.data = json.load_from_file(sector_filename(0,0))
+  
+  local data = love.filesystem.read(sector_filename(0,0))
+  self.sector.data = json.decode(data)
+
   sector_index(self.sector)
 end
 
@@ -544,10 +545,6 @@ function Game:gain_health(entity, health)
   else
     entity.health = entity.health + health
   end
-end
-
-function Game:remove_item_from_entity(entity, item)
-  entity.items = table.reject(entity.items, function (inventory_item) return inventory_item == item end)
 end
 
 function Game:accuracy_check(entity, enemy)
