@@ -1,0 +1,8 @@
+Free Range Monsters is a roguelike where you create a monster and guide its evolution, battling other monsters. 
+
+To run it from source, you'll need to install LÖVE:
+
+    http://love2d.org/
+
+Then run the app.  Christ, I have no idea how to do that for people who haven't setup
+an alias to love.  I need to figure that out.
