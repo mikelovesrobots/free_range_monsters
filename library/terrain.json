@@ -17,6 +17,12 @@
     "forecolor" : [ 41,104,61 ],
     "passable" : true
   },
+  "shallows" : {
+    "name" : "shallows",
+    "character" : "_",
+    "forecolor" : [ 48, 140, 130 ],
+    "passable" : true
+  },
   "water" : {
     "name" : "water",
     "character" : "~",
