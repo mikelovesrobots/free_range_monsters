@@ -183,21 +183,25 @@ end
 
 function Game:astar(sx, sy, dx, dy)
   local visited_map = self:create_empty_boolean_map()
-
-  local candidate_stack={{x=sx, y=sy, parent=nil, movement_cost=0}}
   local cells_examined = 0
-  visited_map[sx][sy]=true
+  local open_list={{x=sx, y=sy, parent=nil, f=math.dist(sx,sy,dx,dy), g=0, h=math.dist(sx,sy,dx,dy)}}
 
-  while (table.present(candidate_stack)) do
-    local candidate = table.pop(candidate_stack)
+  while table.present(open_list) do
+    local candidate = table.shift(open_list)
+
     cells_examined = cells_examined + 1
+    if cells_examined > 100 then
+      debug("astar: examined " .. cells_examined .. " cells, bailing!")
+      return nil
+    end
 
     if candidate.x == dx and candidate.y == dy then
       debug("astar found. cells_examined: " .. cells_examined)
       return self:reconstruct_astar_path(candidate)
     end
 
-    -- find other candidates
+    visited_map[candidate.x][candidate.y] = true
+
     local neighbors = table.select(self:neighboring_coordinates(candidate.x, candidate.y), function (coordinate)
       -- only keep those which are passable and not already visited
       local terrain = self.sector.data.map[coordinate.x][coordinate.y]
@@ -207,35 +211,27 @@ function Game:astar(sx, sy, dx, dy)
         not (terrain.entity and not(dx == coordinate.x and dy == coordinate.y)))
     end)
 
-    -- put them in the stack in priority of closest to the destination
-    table.sort(neighbors, function (a, b)
-      return math.dist(a.x, a.y, dx, dy) > math.dist(b.x, b.y, dx, dy)
-    end)
+    table.each(neighbors, function(coord)
+                            local b = {x=coord.x, y=coord.y, g=candidate.g + 1, h=math.dist(coord.x,coord.y,dx,dy), parent=candidate}
+                            b.f = b.g + b.h
 
-    -- add the candidates for later processing
-    for i,coordinate in ipairs(neighbors) do
-      visited_map[coordinate.x][coordinate.y] = true
+                            local inserted = false
+                            for i, other in ipairs(open_list) do
+                              if other.f > b.f then
+                                table.insert(open_list, i, b)
+                                inserted = true
+                                break
+                              end
+                            end
 
-      local new_candidate = {x=coordinate.x, y=coordinate.y, parent=candidate, movement_cost = candidate.movement_cost + 1}
-      local inserted = false
-
-      if #candidate_stack > 0 then
-        for j, other in ipairs(candidate_stack) do
-          if other.movement_cost < new_candidate.movement_cost then
-            table.insert(candidate_stack, j, new_candidate)
-            inserted = true
-            break
-          end
-        end
-      end
-
-      if (not inserted) then
-        table.insert(candidate_stack, new_candidate)
-      end
-    end
+                            if not inserted then
+                              table.push(open_list, b)
+                            end
+                          end)
   end
 
   -- unreachable from here
+  debug("astar gave up after " .. cells_examined .. " cells examined")
   return nil
 end
 
