@@ -693,7 +693,7 @@ function create_entity(type)
 end
 
 function create_monster_part(type)
-  local base = {armor=0,muscle=0,speed=0,mind=0,health=0,unlocks={},contains={}}
+  local base = {name=type,armor=0,muscle=0,speed=0,mind=0,health=0,unlocks={},contains={}}
   local template = monster_parts_db:create(type)
   return table.merge(base, template)
 end

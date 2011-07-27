@@ -1,15 +1,13 @@
 {
   "armored plates" : {
-    "name" : "armored plates",
     "muscle" : -1,
     "health" : -1,
     "speed" : -1,
-    "defense" : 3,
+    "armor" : 6,
     "unlocks" : [ ]
   },
 
   "arms" : {
-    "name" : "arms",
     "muscle" : 4,
     "health" : 4,
     "speed" : 2,
@@ -17,7 +15,6 @@
   },
 
   "beak" : {
-    "name" : "beak",
     "muscle" : 2,
     "health" : 2,
     "speed" : 1,
@@ -25,14 +22,12 @@
   },
 
   "canine teeth" : {
-    "name" : "canine teeth",
     "armor" : 2,
     "muscle" : 4,
     "speed" : 1
   },
 
   "head" : {
-    "name" : "head",
     "muscle" : 2,
     "health" : 5,
     "mind" : 4,
@@ -40,14 +35,12 @@
   },
 
   "horns" : {
-    "name" : "horns",
     "muscle" : 2,
     "armor" : 2,
     "unlocks" : [ "large horns" ]
   },
 
   "large horns" : {
-    "name" : "large horns",
     "muscle" : 4,
     "armor" : 3,
     "speed" : -1,
@@ -55,7 +48,6 @@
   },
 
   "legs" : {
-    "name" : "legs",
     "muscle" : 2,
     "health" : 4,
     "speed" : 5,
@@ -63,7 +55,6 @@
   },
 
   "massive horns" : {
-    "name" : "massive horns",
     "muscle" : 5,
     "armor" : 5,
     "health" : -2,
@@ -71,20 +62,17 @@
   },
 
   "scales" : {
-    "name" : "scales",
-    "defense" : 1,
+    "armor" : 2,
     "unlocks" : [ "armored plates" ]
   },
 
   "serrated beak" : {
-    "name" : "serrated beak",
     "muscle" : 4,
     "health" : 3,
     "speed" : 0
   },
 
   "tail" : {
-    "name" : "tail",
     "muscle" : 2,
     "health" : 2,
     "speed" : 2,
@@ -92,7 +80,6 @@
   },
 
   "teeth" : {
-    "name" : "teeth",
     "armor" : 1,
     "muscle" : 1,
     "speed" : 1,
@@ -100,7 +87,6 @@
   },
 
   "torso" : {
-    "name" : "torso",
     "armor" : 1,
     "muscle" : 1,
     "speed" : 1,
@@ -110,7 +96,6 @@
   },
 
   "spines" : {
-    "name" : "spines",
     "armor" : 1,
     "muscle" : 1,
     "unlocks" : [ "spikes" ]
