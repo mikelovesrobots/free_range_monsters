@@ -1,17 +1,23 @@
 {
-  "dirt" : { 
+  "dirt" : {
     "character" : ".",
     "forecolor" : [ 43,42,32 ],
       "name" : "dirt",
       "passable" : true
   },
-  "rock" : { 
+  "tree" : {
+    "character" : "Y",
+    "forecolor" : [ 160,232,183 ],
+    "name" : "tree",
+    "passable" : false
+  },
+  "rock" : {
     "character" : "^",
     "forecolor" : [ 160,232,183 ],
     "name" : "rock",
     "passable" : false
   },
-  "rubble" : { 
+  "rubble" : {
     "name" : "rubble",
     "character" : ",",
     "forecolor" : [ 41,104,61 ],
