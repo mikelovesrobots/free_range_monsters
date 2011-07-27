@@ -8,7 +8,7 @@
     "health" : 10,
     "ai" : "hostile"
   },
-  
+
   "bruiser": {
     "name" : "bauntisaurs",
     "character" : "b",
@@ -28,6 +28,7 @@
     "health" : 15,
     "ai" : "player",
     "level" : 0,
+    "evolution_credits" : 0,
     "xp" : 0,
     "max_xp" : 20
   }

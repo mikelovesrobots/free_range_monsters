@@ -1,8 +1,8 @@
 -- add a state to that class using addState, and re-define the method
 local Game = ScreenManager:addState('Game')
-function Game:enterState() 
+function Game:enterState()
   debug("Game initialized")
-  
+
   local font = love.graphics.newFont("fonts/VeraMono.ttf", 13)
   love.graphics.setFont(font);
 
@@ -71,13 +71,17 @@ end
 function Game:start_new_game()
   self:generate_sector()
   self:level_up()
+  self:level_up()
+  self:level_up()
+  self:level_up()
 end
 
 function Game:level_up()
-  self.sector.player.level = self.sector.player.level + 1
+  self.sector.player.evolution_credits = self.sector.player.evolution_credits + 1
 
   screen_manager:pushState("LevelUpScreen")
 
+  self.sector.player.level = self.sector.player.level + 1
   self:gain_health(self.sector.player, self.sector.player.max_health)
   self.sector.player.xp = 0
   self.sector.player.max_xp = 10 * self.sector.player.level
@@ -158,7 +162,7 @@ function Game:get_entity_target(entity)
     local hostiles = table.reject(nearby_entities, function(target)
       return target.allegiance == entity.allegiance
     end)
-    
+
     if #hostiles > 0 then
       return hostiles[1]
     else
@@ -170,7 +174,7 @@ function Game:get_entity_target(entity)
 end
 
 function Game:entities_nearby(entity, range)
-  local results = table.select(self.sector.entities, function(target) 
+  local results = table.select(self.sector.entities, function(target)
     return (math.dist(entity.x, entity.y, target.x, target.y) <= range) and (target ~= entity)
   end)
 
@@ -182,13 +186,13 @@ function Game:astar(sx, sy, dx, dy)
 
   local candidate_stack={{x=sx, y=sy, parent=nil, movement_cost=0}}
   local cells_examined = 0
-  visited_map[sx][sy]=true 
+  visited_map[sx][sy]=true
 
   while (table.present(candidate_stack)) do
     local candidate = table.pop(candidate_stack)
     cells_examined = cells_examined + 1
 
-    if candidate.x == dx and candidate.y == dy then 
+    if candidate.x == dx and candidate.y == dy then
       debug("astar found. cells_examined: " .. cells_examined)
       return self:reconstruct_astar_path(candidate)
     end
@@ -198,20 +202,20 @@ function Game:astar(sx, sy, dx, dy)
       -- only keep those which are passable and not already visited
       local terrain = self.sector.data.map[coordinate.x][coordinate.y]
       return(
-        self:terrain_is_passable(terrain) and 
-        not visited_map[coordinate.x][coordinate.y] and 
+        self:terrain_is_passable(terrain) and
+        not visited_map[coordinate.x][coordinate.y] and
         not (terrain.entity and not(dx == coordinate.x and dy == coordinate.y)))
     end)
 
     -- put them in the stack in priority of closest to the destination
-    table.sort(neighbors, function (a, b) 
-      return math.dist(a.x, a.y, dx, dy) > math.dist(b.x, b.y, dx, dy) 
+    table.sort(neighbors, function (a, b)
+      return math.dist(a.x, a.y, dx, dy) > math.dist(b.x, b.y, dx, dy)
     end)
 
     -- add the candidates for later processing
     for i,coordinate in ipairs(neighbors) do
       visited_map[coordinate.x][coordinate.y] = true
-  
+
       local new_candidate = {x=coordinate.x, y=coordinate.y, parent=candidate, movement_cost = candidate.movement_cost + 1}
       local inserted = false
 
@@ -234,7 +238,7 @@ function Game:astar(sx, sy, dx, dy)
   -- unreachable from here
   return nil
 end
- 
+
 function Game:create_empty_boolean_map()
   local map = {}
   for x,row in ipairs(self.sector.data.map) do
@@ -285,7 +289,7 @@ function Game:nearest_walkable_empty_coordinate(x,y)
   return nil
 end
 
-function Game:terrain_is_passable(terrain) 
+function Game:terrain_is_passable(terrain)
   return terrain.passable
 end
 
@@ -305,8 +309,8 @@ function Game:neighboring_coordinates(x1,y1)
 end
 
 function Game:neighboring_terrain(x,y)
-  return table.collect(self:neighboring_coordinates(x, y), function (coordinate) 
-    return self.sector.data.map[coordinate.x][coordinate.y] 
+  return table.collect(self:neighboring_coordinates(x, y), function (coordinate)
+    return self.sector.data.map[coordinate.x][coordinate.y]
   end)
 end
 
@@ -350,7 +354,7 @@ end
 
 function Game:load_sector()
   self.sector = {}
-  
+
   local data = love.filesystem.read(sector_filename(0,0))
   self.sector.data = json.decode(data)
 
@@ -382,10 +386,10 @@ function Game:generate_sector()
       map=generate_map()
     }
   }
-  
-  table.each(entities, 
-             function(entity) 
-               self:place_entity(entity, math.random(1, app.config.MAP_NUM_CELLS_X), math.random(1, app.config.MAP_NUM_CELLS_Y)) 
+
+  table.each(entities,
+             function(entity)
+               self:place_entity(entity, math.random(1, app.config.MAP_NUM_CELLS_X), math.random(1, app.config.MAP_NUM_CELLS_Y))
              end)
 end
 
@@ -410,7 +414,7 @@ function sector_index(sector)
     for y,terrain in ipairs(row) do
       if terrain.entity then
         table.insert(sector.entities, terrain.entity)
-        
+
         if terrain.entity.name == "player" then
           sector.player = terrain.entity
         end
@@ -448,7 +452,7 @@ end
 
 function Game:draw_status_messages()
   love.graphics.setColor(255,255,255);
-  
+
   local text = ''
 
   local start_index = clip(#self.status_messages - 8, 1, #self.status_messages)
@@ -477,7 +481,7 @@ function Game:draw_stats()
 end
 
 function text_indicator(label, current, max)
-  local calc_stars = function () 
+  local calc_stars = function ()
     local result = ''
 
     local num_stars = math.floor(current / max * 10)
@@ -515,7 +519,7 @@ function Game:move_entity(entity, x_offset, y_offset)
       self:attack(entity, enemy)
     else
       map[entity.x][entity.y].entity = nil
-      
+
       entity.x = x
       entity.y = y
 
@@ -643,7 +647,7 @@ function add_random_crypt(map)
   local random_crypt_name = table.random(table.keys(crypts_db.db))
   debug("adding " .. random_crypt_name .. " crypt")
   local crypt = create_crypt(random_crypt_name)
- 
+
   local crypt_width = #crypt.map[1]
   local crypt_height = #crypt.map
 

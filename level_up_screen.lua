@@ -1,7 +1,7 @@
 -- add a state to that class using addState, and re-define the method
 local LevelUpScreen = ScreenManager:addState('LevelUpScreen')
 
-function LevelUpScreen:enterState() 
+function LevelUpScreen:enterState()
   debug("LevelUpScreen initialized")
   self.parent_parts = {}
   self:reset_menu(self.sector.player.base_part)
@@ -19,15 +19,15 @@ function LevelUpScreen:draw()
   love.graphics.printf("Your race of monsters evolves!", 0, 25, 800, 'center')
 
   set_color(app.config.MENU_REGULAR_COLOR)
-  love.graphics.printf("Choose an upgrade", 0, 50, 800, 'center')
-  
+  love.graphics.printf("Choose " .. pluralize(self.sector.player.evolution_credits, "upgrade"), 0, 50, 800, 'center')
+
   love.graphics.printf("(" .. self.base_part.name .. ")", 0, 75, 800, 'center')
 
   if table.present(self.parent_parts) then
     love.graphics.printf("( press esc to return to " .. self.parent_parts[1].name .. " )", 0, 550, 800, 'center')
   end
 
-  for i,part in ipairs(self.menu) do 
+  for i,part in ipairs(self.menu) do
     local text = part.name
 
     if table.includes(self.base_part.contains, part) then
@@ -89,9 +89,9 @@ function LevelUpScreen:reset_menu(base_part)
                                       end)
 
   table.each(self.base_part.unlocks, function (name)
-                                       local installed_names = table.collect(self.base_part.contains, function(x) return x.name end)       
+                                       local installed_names = table.collect(self.base_part.contains, function(x) return x.name end)
                                        if not table.includes(installed_names, name) then
-                                         table.push(self.menu, create_monster_part(name)) 
+                                         table.push(self.menu, create_monster_part(name))
                                        end
                                      end)
 
@@ -106,6 +106,9 @@ function LevelUpScreen:selected_item(part)
     debug("installing part")
 
     table.push(self.base_part.contains, part)
-    screen_manager:popState()
+    self.sector.player.evolution_credits = self.sector.player.evolution_credits - 1
+    if self.sector.player.evolution_credits < 1 then
+      screen_manager:popState()
+    end
   end
 end

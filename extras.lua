@@ -15,9 +15,9 @@ end
 function between(val, min, max)
   return val >= min and val <= max
 end
- 
-function math.dist(x1, y1, x2, y2) 
-  return ((x2-x1)^2+(y2-y1)^2)^0.5 
+
+function math.dist(x1, y1, x2, y2)
+  return ((x2-x1)^2+(y2-y1)^2)^0.5
 end
 
 function read_file (path)
@@ -32,11 +32,20 @@ json.load_from_file = function(path)
   local result = json.decode(read_file(path))
   if table.present(result) then
     return result
-  else 
+  else
     error("Couldn't properly parse json: " .. path)
   end
 end
 
 function set_color(rgb)
   love.graphics.setColor(rgb[1], rgb[2], rgb[3])
+end
+
+function pluralize(num, string)
+  singular = num .. " " .. string
+  if num == 1 then
+    return singular
+  else
+    return singular .. "s"
+  end
 end
