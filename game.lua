@@ -534,6 +534,8 @@ function Game:attack(entity, enemy)
   if self:accuracy_check(entity, enemy) then
     self:flavor_message("unarmed_hit", {entity_name=entity.name, enemy_name=enemy.name})
     local armor_absorption = math.random(enemy.armor / 2, enemy.armor)
+    debug("entity.muscle = " .. entity.muscle)
+    debug("armor_absorption = " .. armor_absorption)
     if entity.muscle > armor_absorption then
       self:damage_entity(entity, enemy, entity.muscle - armor_absorption)
     else
