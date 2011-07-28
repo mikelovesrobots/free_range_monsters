@@ -17,8 +17,8 @@ table.detect = function(list, func)
 end
 
 table.without = function(list, item)
-  return table.reject(list, function (x) 
-    return x == item 
+  return table.reject(list, function (x)
+    return x == item
   end)
 end
 
@@ -51,7 +51,7 @@ end
 table.partition = function(list, func)
   local matches = {}
   local rejects = {}
-  
+
   for i,x in ipairs(list) do
     if (func(x, i)) then
       table.insert(matches, x)
@@ -59,7 +59,7 @@ table.partition = function(list, func)
       table.insert(rejects, x)
     end
   end
-  
+
   return matches, rejects
 end
 
@@ -84,13 +84,13 @@ table.push = function(list, item)
   return table.insert(list, item)
 end
 
-table.collect = function(source, func) 
+table.collect = function(source, func)
   local result = {}
   for i,v in ipairs(source) do table.insert(result, func(v)) end
   return result
 end
 
-table.empty = function(source) 
+table.empty = function(source)
   return source == nil or next(source) == nil
 end
 
@@ -137,4 +137,17 @@ table.keys = function(source)
     table.push(result, k)
   end
   return result
+end
+
+-- untested
+table.fold = function(t, init, f)
+    for k,v in pairs(t) do
+        init = f(init, v, k)
+    end
+    return init
+end
+
+-- untested
+table.sum = function(t, f)
+  return table.fold(t, 0, function(a, b) return a + b end)
 end

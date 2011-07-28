@@ -533,7 +533,12 @@ end
 function Game:attack(entity, enemy)
   if self:accuracy_check(entity, enemy) then
     self:flavor_message("unarmed_hit", {entity_name=entity.name, enemy_name=enemy.name})
-    self:damage_entity(entity, enemy, 1)
+    local armor_absorption = math.random(enemy.armor / 2, enemy.armor)
+    if entity.muscle > armor_absorption then
+      self:damage_entity(entity, enemy, entity.muscle - armor_absorption)
+    else
+      self:flavor_message("unarmed_absorbed", {entity_name=entity.name, enemy_name=enemy.name})
+    end
   else
     self:flavor_message("unarmed_miss", {entity_name=entity.name, enemy_name=enemy.name})
   end
@@ -676,6 +681,18 @@ function clip(i, min, max)
   end
 end
 
+function cache_attributes(entity)
+  table.each({'armor', 'muscle', 'speed', 'mind'}, function (attribute)
+                                                     entity[attribute] = sum_descent(entity.base_part, attribute)
+                                                   end)
+end
+
+function sum_descent(part, attribute)
+  local sum = part[attribute]
+  table.each(part.contains, function(other) sum = sum + other[attribute] end)
+  return sum
+end
+
 function create_terrain(type)
   local base={seen=false}
   local template = terrain_db:create(type)
@@ -685,7 +702,9 @@ end
 function create_entity(type)
   local base = {x=0, y=0, level=1, base_part=create_monster_part("torso")}
   local template = entities_db:create(type)
-  return table.merge(base, template)
+  local entity = table.merge(base, template)
+  cache_attributes(entity)
+  return entity
 end
 
 function create_monster_part(type)

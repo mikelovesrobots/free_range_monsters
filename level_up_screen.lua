@@ -106,6 +106,8 @@ function LevelUpScreen:selected_item(part)
     debug("installing part")
 
     table.push(self.base_part.contains, part)
+    cache_attributes(self.sector.player)
+
     self.sector.player.evolution_credits = self.sector.player.evolution_credits - 1
     if self.sector.player.evolution_credits < 1 then
       screen_manager:popState()

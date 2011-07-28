@@ -11,6 +11,9 @@
     "{entity_name} misses {enemy_name}",
     "{entity_name} could not hit {enemy_name}"
   ],
+  "unarmed_absorbed": [
+    "{enemy_name} blocked {entity_name}"
+  ],
   "see_item": [
     "there is a {item_name} here"
   ],
