@@ -6,8 +6,7 @@
     "allegiance" : "railors",
     "max_health" : 10,
     "health" : 10,
-    "ai" : "hostile",
-    "muscle" : 3
+    "ai" : "hostile"
   },
 
   "bruiser": {
@@ -17,8 +16,7 @@
     "allegiance" : "bauntisaurs",
     "max_health" : 10,
     "health" : 10,
-    "ai" : "hostile",
-    "muscle" : 5
+    "ai" : "hostile"
   },
 
   "player": {

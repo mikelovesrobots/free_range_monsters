@@ -72,8 +72,6 @@ function Game:start_new_game()
   self:generate_sector()
   self:level_up()
   self:level_up()
-  self:level_up()
-  self:level_up()
 end
 
 function Game:level_up()
@@ -464,7 +462,7 @@ function Game:draw_stats()
 
   local stats = {
     text_indicator("Health", self.sector.player.health, self.sector.player.max_health),
-    text_indicator("  Food", 10, 20),
+    text_indicator(" Water", 10, 20),
     text_indicator("    XP", self.sector.player.xp, self.sector.player.max_xp),
   }
 
@@ -686,12 +684,13 @@ end
 function cache_attributes(entity)
   table.each({'armor', 'muscle', 'speed', 'mind'}, function (attribute)
                                                      entity[attribute] = sum_descent(entity.base_part, attribute)
+                                                     debug(attribute .. " is now " .. entity[attribute])
                                                    end)
 end
 
 function sum_descent(part, attribute)
   local sum = part[attribute]
-  table.each(part.contains, function(other) sum = sum + other[attribute] end)
+  table.each(part.contains, function(other) sum = sum + sum_descent(other, attribute) end)
   return sum
 end
 
